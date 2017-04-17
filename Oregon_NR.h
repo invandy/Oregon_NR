@@ -1,8 +1,3 @@
-//Arduino library for receiving data from Oregon Scientific v2 wireless temperature and humidity sensors.
-//Supported sensors: THGN132N, THN132N and similar.
-//Most suitable for EM noisy environmental and weak signal conditions. 
-//Release date: 04 Mar 2017. 
-//Compatable with Atmega and ESP8266-based boards.
 
 #include <Arduino.h>
 
