@@ -85,7 +85,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
     if (start_pulse_cnt == 0){
       ////////////////////////////////////////////////////////
       //Найдена первый "правильный" импульс - длинная единица!  
-      if (pulse_length < (PER_LENGTH) && pulse_length > (THR_LENGTH) ) {
+      if (pulse_length < (PER_LENGTH + 16) && pulse_length > (THR_LENGTH) ) {
         start_pulse_cnt = 1;
         pre_marker[start_pulse_cnt] = pulse_marker;
         pulse_length = 0;
@@ -94,7 +94,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
     else{
       ///////////////////////////////////////////////////////////
       //Найдена следующий "правильный" импульс - длинная единица!  
-      if (pulse_length <= (PER_LENGTH) && pulse_length >= (THR_LENGTH)) {
+      if (pulse_length <= (PER_LENGTH + 16) && pulse_length >= (THR_LENGTH)) {
         ///////////////////////////////////////////////////////////
         //Если импульс в правильном месте, то добавляем счётчик найденых стартовых импульсов
         if(pulse_marker - pre_marker[start_pulse_cnt] > (PER_LENGTH*2-LENGTH_TOLERANCE) && pulse_marker - pre_marker[start_pulse_cnt] < (PER_LENGTH * 2 + LENGTH_TOLERANCE)){
