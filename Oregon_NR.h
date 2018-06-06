@@ -18,7 +18,7 @@
 
 #define PER_LENGTH 976            
 #define THR_LENGTH 615            
-#define LENGTH_TOLERANCE 20       
+#define LENGTH_TOLERANCE 32       
 
 static int RECEIVER_PIN;
 
