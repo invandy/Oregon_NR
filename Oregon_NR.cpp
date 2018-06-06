@@ -484,8 +484,8 @@ byte Oregon_NR::collect(byte* cdptr){
     last_premarker += PER_LENGTH / 2;
     bt2++;
     //  Каждые 8 тактов добавлять 5мкс для выравнивания периода с 976мкс до 976.56мкс
-    if (bt2 == 8) { 
-      last_premarker += 5;
+    if (bt2 == 7) { 
+      last_premarker += 4;
       bt2 = 0;
     }
     tmp_marker = last_premarker + PER_LENGTH / 32;
