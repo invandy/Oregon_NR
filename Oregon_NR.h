@@ -6,7 +6,7 @@
 
 #define READ_BITS 96              
 #define READ_BITS2 192            
-#define PACKET_LENGTH 20          
+#define PACKET_LENGTH 32          
 
 #define THGN132 0x1D20            
 #define THN132  0xEC40
