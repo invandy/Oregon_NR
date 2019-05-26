@@ -2,7 +2,7 @@
 #ifndef Oregon_NR_h
 #define Oregon_NR_h
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// This code records receives data from Oregon Scientific v2 and v3 wireless sensors.
+// This code receives data from Oregon Scientific v2 and v3 wireless sensors.
 // Most suitable for EM noisy environmental and weak signal conditions. 
 // Is to be compatable with Atmega and ESP8266-based boards.
 //
