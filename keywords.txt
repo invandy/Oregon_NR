@@ -1,0 +1,51 @@
+
+Oregon_NR	KEYWORD1
+
+start	KEYWORD2
+stop	KEYWORD2
+capture	KEYWORD2	
+
+sens_type	KEYWORD3
+sens_tmp	KEYWORD3
+sens_hmdty	KEYWORD3
+sens_chnl	KEYWORD3
+sens_id	KEYWORD3
+sens_battery	KEYWORD3
+ver	KEYWORD3
+crc_c	KEYWORD3
+captured	KEYWORD3
+work_time	KEYWORD3
+packet	KEYWORD3
+valid_p	KEYWORD3
+packets_received	KEYWORD3
+received_CRC	KEYWORD3
+catch2	KEYWORD3
+catch3	KEYWORD3
+sens_avg_ws	KEYWORD3
+sens_max_ws;	KEYWORD3
+sens_wdir	KEYWORD3
+UV_index	KEYWORD3
+lightness	KEYWORD3
+restore_sign	KEYWORD3
+receiver_dump	KEYWORD3
+
+THGN132		LITERAL1
+THN132		LITERAL1
+RTGN318		LITERAL1
+THGR810		LITERAL1
+WGR800		LITERAL1
+UVN800		LITERAL1
+
+Oregon_TM	KEYWORD1
+
+SendBuffer	KEYWORD3
+protocol	KEYWORD3
+setType		KEYWORD3	
+setChannel	KEYWORD3
+setId		KEYWORD3
+setBatteryFlag	KEYWORD3
+setTemperature	KEYWORD3
+setHumidity	KEYWORD3
+setComfort	KEYWORD3
+transmit	KEYWORD3
+SendPacket	KEYWORD3
