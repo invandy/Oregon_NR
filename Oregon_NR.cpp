@@ -258,9 +258,17 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   // Анализ данных////////////////////////////////////////////////////////
   if  (receive_status == ANALIZE_PACKETS) {     
     //////////////////////////////////////////////////////////////////////
+    //Если пришёл тольок кусок посылки, то не стоит и обрабатывать
+    if ((ver ==2 && read_tacts < 136 && read_tacts2 < 136) || (ver ==3 && read_tacts < 80)) 
+    {
+      receive_status = FIND_PACKET;
+      start_pulse_cnt = 0;  
+      packet_number = 0;
+       return;
+    }
     //Отключаем прерывание, чтобы сократить время обработки
     detachInterrupt(INT_NO);
-    
+   
     led_light(true);
     restore_sign = 0;
    
@@ -269,6 +277,8 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       // v2 - 87 07  и изредка 86 06, т.к. длина импульса 883мс и 395мс
       // v3 - 86 06 и изредка 87 07  т.к. длина импульса 838 и 350мс
         if (DEBUG_INFO && receiver_dump){
+          Serial.println(" ");
+          Serial.print("SCOPE1 ");
           for(int bt = 0; bt < read_tacts; bt++){
             Serial.print((collect_data[bt] & 0xF0) >> 4, HEX);
             Serial.print(collect_data[bt] & 0x0F, HEX);
@@ -277,20 +287,22 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           Serial.println(" ");
           if ( packet_number == 2)
           {
+            Serial.print("SCOPE2 ");
             for(int bt = 0; bt < read_tacts2; bt++){
               Serial.print((collect_data2[bt] & 0xF0) >> 4, HEX);
               Serial.print(collect_data2[bt] & 0x0F, HEX);
               Serial.print(' ');
             }
+            Serial.println(" ");
           }
-          Serial.println(" ");
+
         }
 
 
     //////////////////////////////////////////////
     //Обработка первой записи
     //Расшифровываем запись. Данные сохраянем в decode_tacts[]
-    get_tacts(collect_data);
+    get_tacts(collect_data, read_tacts);
     bool halfshift;
 
     if (get_data(0, ver, collect_data) > get_data(1, ver, collect_data)){
@@ -307,7 +319,8 @@ void Oregon_NR::capture(bool DEBUG_INFO)
     //////////////////////////////////////////////
     //Выводим посылку
     if (DEBUG_INFO){
-      Serial.print("1)     ");
+    if (packet_number == 2)   Serial.print("1)     ");
+    if (packet_number == 1)   Serial.print("RESULT ");
       for(int bt = 0; bt < READ_BITS; bt++) {
         if ((ver == 3 && bt <= read_tacts) || (ver == 2 && bt <= read_tacts / 2)){
           if (collect_data[bt] > 128 + 1) Serial.print('I');
@@ -315,6 +328,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (collect_data[bt] == 128 + 1) Serial.print('i');
           if (collect_data[bt] == 128 - 1) Serial.print('o');
           if (collect_data[bt] == 128) Serial.print('.');
+           if (receiver_dump) Serial.print("  ");
         }
         else Serial.print(' ');
       }
@@ -330,7 +344,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
     //////////////////////////////////////////////
     //Аналогично обрабатываем вторую запись
     if (packet_number == 2){
-      get_tacts(collect_data2);
+      get_tacts(collect_data2, read_tacts2);
 
       if (get_data(0, ver, collect_data2) > get_data(1, ver, collect_data2)) {
         data_val2 = get_data(0, ver, collect_data2);
@@ -351,6 +365,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (collect_data2[bt] == 128 + 1) Serial.print('i');
           if (collect_data2[bt] == 128 - 1) Serial.print('o');
           if (collect_data2[bt] == 128) Serial.print('.');
+          if (receiver_dump) Serial.print("  ");
         }
         else Serial.print(' ');
       }
@@ -412,6 +427,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (*rdt == 128 + 1) Serial.print('i');
           if (*rdt == 128 - 1) Serial.print('o');
           if (*rdt == 128) Serial.print('.');
+          if (receiver_dump) Serial.print("  ");
         }
         else Serial.print(' ');
           rdt++;
@@ -592,14 +608,14 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 //Извлекает из записи тактовую последовательности
 //Параметры: cdptr - указатель на записанную тактовую последовательность
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void Oregon_NR::get_tacts(byte* cdptr){
+void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
   
 //Сброс массивов
-  for(int bt = 0 ; bt < READ_BITS*2; bt++) decode_tacts[bt] = 2;      //Изначально такт неизвестен
+  for(int bt = 0 ; bt < bitsize; bt++) decode_tacts[bt] = 2;      //Изначально такт неизвестен
 
 //Расшифровка тактов      
   byte* cdp = cdptr;        
-  for(int bt = 0 ; bt < READ_BITS * 2; bt++)
+  for(int bt = 0 ; bt < bitsize; bt++)
   {
     if (ver == 2)  
     {
@@ -627,8 +643,11 @@ void Oregon_NR::get_tacts(byte* cdptr){
  if (receiver_dump)
  {
    byte* cdp = cdptr;        
-   Serial.println();
-   for(int bt = 0 ; bt < READ_BITS * 2; bt++)
+   Serial.print("BEFORE ");
+
+
+  for(int bt = 0 ; bt < bitsize; bt++)
+
    {
 
      if (decode_tacts[bt] == 1) Serial.print("II"); 
@@ -636,6 +655,7 @@ void Oregon_NR::get_tacts(byte* cdptr){
      if (decode_tacts[bt] == 2) Serial.print("__"); 
      if (decode_tacts[bt] == 3) Serial.print("IO"); 
      if (decode_tacts[bt] == 4) Serial.print("OI"); 
+     Serial.print(" "); 
      *cdp++;
   }
    Serial.println();
@@ -645,22 +665,21 @@ void Oregon_NR::get_tacts(byte* cdptr){
 // Расшифровали всё, что смогли с ходу
 //Проверяем допустима ли тактовая последовательность
 
-  for(int bt = 1; bt < READ_BITS * 2; bt++)
+  for(int bt = 1; bt < bitsize; bt++)
   {
-    if (decode_tacts[bt] == 2 && bt && bt < READ_BITS * 2 - 2)
+//    if (decode_tacts[bt] == 2)
     {
        //Х0 0X - недопустима
       if ((decode_tacts[bt - 1]  == 0  || decode_tacts[bt - 1]  == 3) && (decode_tacts[bt] == 0 || decode_tacts[bt] == 4)) decode_tacts[bt] = 2;
        //Х1 1X - недопустима
       if ((decode_tacts[bt - 1]  == 1  || decode_tacts[bt - 1]  == 4) && (decode_tacts[bt] == 1 || decode_tacts[bt] == 3)) decode_tacts[bt] = 2;
     }
-   //*cdp++;
   }
 
 //Восстановление одиночных тактов  
-  for(int bt = 1; bt < (READ_BITS * 2 - 1); bt++)
+  for(int bt = 1; bt < (bitsize - 1); bt++)
   {
-    if (decode_tacts[bt] == 2 && bt && bt < READ_BITS * 2 - 2)
+    if (decode_tacts[bt] == 2)
     {
        //Х0 __ 0Х
        //Х0 11 0Х     
@@ -687,14 +706,13 @@ void Oregon_NR::get_tacts(byte* cdptr){
         restore_sign ^= 2;
       }
     }
-   *cdp++;
   }
 
   //восстановление потерянных полутактов
    cdp = cdptr;        
-   for(int bt = 1 ; bt < (READ_BITS * 2 - 1); bt++)
+   for(int bt = 1 ; bt < (bitsize - 1); bt++)
    {
-     if (decode_tacts[bt] == 2 && bt && bt < READ_BITS * 2 - 2)
+     if (decode_tacts[bt] == 2)
      {
      //Х0 _0
      //Х0 10
@@ -724,79 +742,9 @@ void Oregon_NR::get_tacts(byte* cdptr){
    *cdp++;
   }
 
-
-/*  //восстановление потерянных тактов снова
-  //Точно не определил, какой метод работает лучше. НО если этот отключить - лучше схватываются пакеты с неправильной частотой синхронизации
-  for(int bt = 0; bt < READ_BITS * 2; bt++)
-  {
-    if (decode_tacts[bt] == 2 && bt && bt < READ_BITS * 2 - 2)
-    {
-       //Х0 __ 0Х
-       //Х0 11 0Х     
-      if((*(cdp - 1) & 0x0F) < 0x03 && (*(cdp + 1) & 0xF0) < 0x30){
-        decode_tacts[bt] = 1;
-        restore_sign ^= 2;
-      }
-       //Х0 __ 1Х
-       //Х0 10 1Х     
-      if((*(cdp - 1) & 0x0F) < 0x03 && (*(cdp + 1) & 0xF0) > 0x40){
-        decode_tacts[bt] = 3;
-        restore_sign ^= 2;
-      }
-       //Х1 __ 0Х
-       //Х1 01 0Х     
-      if((*(cdp - 1) & 0x0F) > 0x04 && (*(cdp + 1) & 0xF0) < 0x30){
-        decode_tacts[bt] = 4;
-        restore_sign ^= 2;
-      }
-       //Х1 __ 1Х
-       //Х1 00 1Х     
-      if((*(cdp - 1) & 0x0F) > 0x04 && (*(cdp + 1) & 0xF0) > 0x40){
-        decode_tacts[bt] = 0;
-        restore_sign ^= 2;
-      }
-
-    }
-  *cdp++;
-  }
-
-  //восстановление потерянных полутактов. Снова
-  cdp = cdptr;        
-  for(int bt = 0 ; bt < READ_BITS * 2; bt++)
-  {
-     if (decode_tacts[bt] == 2 && bt && bt < READ_BITS * 2 - 2)
-     {
-      //Х0 _0
-      //Х0 10
-      if((*(cdp - 1) & 0x0F) < 0x03 && (*cdp & 0x0f) < 0x05){
-        decode_tacts[bt] = 3;
-        restore_sign ^= 1;
-      }
-      //Х1 _1
-      //Х1 01
-      if((*(cdp - 1) & 0x0F) > 0x04 && (*cdp & 0x0f) > 0x04){
-        decode_tacts[bt] = 4;
-        restore_sign ^= 1;
-      }
-      //0_ 0X
-      //01 0X
-      if((*(cdp + 1) & 0xF0) < 0x30 && (*cdp & 0xf0) < 0x30){
-        decode_tacts[bt] = 4;
-        restore_sign ^= 1;
-      }
-      //1_ 1X
-      //10 1X
-      if((*(cdp + 1) & 0xF0) > 0x40 && (*cdp & 0xf0) > 0x40){
-        decode_tacts[bt] = 3;
-        restore_sign ^= 1;
-      }
-     }
-   *cdp++;
-  }*/
-
   //Снова проверяем допустима ли тактовая последовательность, а то что мы там воссановили - неизвестно :)
 
-  for(int bt = 1; bt < READ_BITS * 2; bt++)
+  for(int bt = 1; bt < bitsize; bt++)
   {
     {
        //Х0 0X - недопустима
@@ -836,14 +784,15 @@ void Oregon_NR::get_tacts(byte* cdptr){
  if (receiver_dump)
  {
    byte* cdp = cdptr;        
-   Serial.println();
-   for(int bt = 0 ; bt < READ_BITS * 2; bt++)
+   Serial.print("AFTER  ");
+   for(int bt = 0 ; bt < bitsize; bt++)
    {
      if (decode_tacts[bt] == 1) Serial.print("II"); 
      if (decode_tacts[bt] == 0) Serial.print("OO"); 
      if (decode_tacts[bt] == 2) Serial.print("__"); 
      if (decode_tacts[bt] == 3) Serial.print("IO"); 
      if (decode_tacts[bt] == 4) Serial.print("OI"); 
+     Serial.print(" "); 
      *cdp++;
   }
    Serial.println();
@@ -1212,9 +1161,10 @@ int Oregon_NR::get_info_data(byte* code, byte* result, byte* valid){
     if (  consist_synchro && (*code < 127 && *(code + 1) > 129 && *(code + 2) < 127 && *(code + 3) > 129)) break; 
     code++;
   }
-  // Синхронибл в первых 20 битах не найден, такой пакет не расшифруешь!
-  
-  if (csm > 22) return 0; 
+  // Синхронибл в первых 20 битах не найден, такой пакет не расшифруешь во второй версии протокола!
+  if (ver == 2 & csm > 22) return 0; 
+  // ДЛя третьей версии протокола цифра иная
+  if (ver == 3 & csm > 30) return 0; 
   //Переходим на начало считывания
   code += 4;
   int ii = 0;

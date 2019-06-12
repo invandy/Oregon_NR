@@ -262,7 +262,7 @@ class Oregon_NR
     int correlate_data(byte* ser1, byte* ser2);
     int collect(byte* cdptr);
     int get_data(int btt, byte p_ver, byte* cdptr);
-    void get_tacts(byte* cdptr);
+    void get_tacts(byte*, byte);
     int get_synchro_pos(byte* code);
     void led_light(bool);
 
