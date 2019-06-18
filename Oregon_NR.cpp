@@ -619,10 +619,10 @@ void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
   {
     if (ver == 2)  
     {
-      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 1; // Òàêò 11 (Â ÈÄÅÀËÅ 87, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 58 ÄÀ 84)
-      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05) decode_tacts[bt] = 0; // Òàêò 00 (Â ÈÄÅÀËÅ 00, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 30 ÄÀ 03)
-      if ((*cdp & 0xf0) < 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 4; // Òàêò 01 (Â ÈÄÅÀËÅ 07, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÄÎ 34)
-      if ((*cdp & 0xf0) > 0x40 && (*cdp & 0x0f) < 0x02) decode_tacts[bt] = 3; // Òàêò 10 (Â ÈÄÅÀËÅ 70, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÄÎ 43)
+      if ((*cdp & 0xf0) > 0x30 && (*cdp & 0x0f) > 0x03) decode_tacts[bt] = 1; // Òàêò 11 (Â ÈÄÅÀËÅ 87, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 58 ÄÀ 84)
+      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x03) decode_tacts[bt] = 0; // Òàêò 00 (Â ÈÄÅÀËÅ 00, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 30 ÄÀ 03)
+      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) > 0x03) decode_tacts[bt] = 4; // Òàêò 01 (Â ÈÄÅÀËÅ 07, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÄÎ 34)
+      if ((*cdp & 0xf0) > 0x30 && (*cdp & 0x0f) < 0x03) decode_tacts[bt] = 3; // Òàêò 10 (Â ÈÄÅÀËÅ 70, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÄÎ 43)
   //    if ((*cdp & 0xf0) > 0x50 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 1; // Òàêò 11 (Â ÈÄÅÀËÅ 87, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 58 À 84)
   //    if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x03) decode_tacts[bt] = 0; // Òàêò 00 (Â ÈÄÅÀËÅ 00, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÎÒ 30 ÄÀ 03)
   //    if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 4; // Òàêò 01 (Â ÈÄÅÀËÅ 07, ÍÎ ÈÇ ÇÀ ÑÄÂÈÃÀ ÍÀ 3 ÒÀÊÒÀ ÌÎÆÅÒ ÁÛÒÜ ÄÎ 34)
@@ -1637,13 +1637,13 @@ byte Oregon_NR::get_fire_lockalarm(byte* fire_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 float Oregon_NR::get_current(byte* current_data){
 
-  return (current_data[4] * 0x1000 + current_data[5] * 0x0100  + current_data[6] * 0x0010  + current_data[7]) / 1000;
+  return ((float)(current_data[4] * 0x1000 + current_data[5] * 0x0100  + current_data[6] * 0x0010  + current_data[7])) / 1000;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 float Oregon_NR::get_voltage(byte* voltage_data){
 
-  return (voltage_data[8] * 0x1000 + voltage_data[9] * 0x0100  + voltage_data[10] * 0x0010  + voltage_data[11]) / 10;
+  return ((float)(voltage_data[8] * 0x1000 + voltage_data[9] * 0x0100  + voltage_data[10] * 0x0010  + voltage_data[11])) / 10;
 }
 
 word Oregon_NR::get_pump_count(byte* voltage_data){
