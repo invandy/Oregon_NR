@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
 //
-// Last updated: 24 June 2019
+// Last updated: 29 June 2019
 //
 // The folowed sensors data format are supported.
 //
@@ -41,7 +41,7 @@
 //
 // Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0
 //
-// Последнее обновление 24 июня 2019
+// Последнее обновление 29 июня 2019
 //
 // Поддерживается формат следующих датчиков
 //
@@ -980,7 +980,7 @@ int Oregon_NR::collect(byte* cdptr){
     //  Каждые 7 тактов добавлять 4мкс для выравнивания периода с 976мкс до 976.5714мкс + 0.009%
     if (bt2 == 7) 
     { 
-      pre_marker += 4;
+      pre_marker += (4 + timing_correction) ;
       bt2 = 0;
     }
 
