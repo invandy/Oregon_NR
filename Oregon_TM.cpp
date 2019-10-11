@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
 //
-// Last updated: 29 June 2019
+// Last updated: 11 October 2019
 //
 // The folowed sensors data format are supported.
 //
@@ -41,7 +41,7 @@
 //
 // Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0
 //
-// Последнее обновление 29 июня 2019
+// Последнее обновление 11 Октября 2019
 //
 // Поддерживается формат следующих датчиков
 //
@@ -209,8 +209,8 @@ void Oregon_TM::sendMSB(byte data)
   (bitRead(data, 5)) ? sendOne() : sendZero();
   (bitRead(data, 6)) ? sendOne() : sendZero();
   (bitRead(data, 7)) ? sendOne() : sendZero();
-  if (protocol == 2) time_marker += 4;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
-  if (protocol == 3) time_marker += 2;
+  if (protocol == 2) time_marker += timing_corrector2;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
+  if (protocol == 3) time_marker += timing_corrector3;
                      
   
 }
@@ -222,8 +222,8 @@ void Oregon_TM::sendLSB(byte data)
   (bitRead(data, 1)) ? sendOne() : sendZero();
   (bitRead(data, 2)) ? sendOne() : sendZero();
   (bitRead(data, 3)) ? sendOne() : sendZero();
-  if (protocol == 2) time_marker += 4;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
-  if (protocol == 3) time_marker += 2;
+  if (protocol == 2) time_marker += timing_corrector2;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
+  if (protocol == 3) time_marker += timing_corrector3;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

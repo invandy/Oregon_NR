@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
 //
-// Last updated: 29 June 2019
+// Last updated: 11 October 2019
 //
 // The folowed sensors data format are supported.
 //
@@ -41,7 +41,7 @@
 //
 // Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0
 //
-// Последнее обновление 29 июня 2019
+// Последнее обновление 11 Октября 2019
 //
 // Поддерживается формат следующих датчиков
 //
@@ -81,7 +81,15 @@
 #define Oregon_NR_int
 static volatile unsigned long pm;
 static volatile unsigned long pl, timer_mark;  
+
+#if defined ( ESP8266 )
+void ICACHE_RAM_ATTR receiver_interruption(void) {  
+#elif defined ( ESP32 )
+void ICACHE_RAM_ATTR receiver_interruption(void) {  
+#else
 void receiver_interruption(void) {  
+#endif
+
   if(digitalRead(RECEIVER_PIN)){
   //Начало импульса
     pl = 0;
@@ -158,7 +166,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   ////////////////////////////////////////////////////////
   //Пришёл импульс
   if (pulse_length != 0 && receive_status == FIND_PACKET){  
-
+  //Если импульс пришёл слишком поздно для конкретной версии протокола, то это первый импульс
     if (pulse_marker - pre_marker > (PER_LENGTH2 * 2 + LENGTH_TOLERANCE) && ver == 2) start_pulse_cnt = 0;
     if (pulse_marker - pre_marker > (PER_LENGTH3 * 2 + LENGTH_TOLERANCE) && ver == 3) start_pulse_cnt = 0;
 
@@ -239,7 +247,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 
   if (start_pulse_cnt == CATCH_PULSES && receive_status == FIND_PACKET) {
     
-    work_time = millis();
+
     start_pulse_cnt = 0;
     if (packet_number == 0)
     {
@@ -271,7 +279,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
    
     led_light(true);
     restore_sign = 0;
-   
+    work_time = millis();   //Расчёт времени обработки пакета
       //Дамп собранных данных        
       //ДЛя посылки без помех значения имурльсов олжны быть примерно
       // v2 - 87 07  и изредка 86 06, т.к. длина импульса 883мс и 395мс
@@ -328,7 +336,8 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (collect_data[bt] == 128 + 1) Serial.print('i');
           if (collect_data[bt] == 128 - 1) Serial.print('o');
           if (collect_data[bt] == 128) Serial.print('.');
-           if (receiver_dump) Serial.print("  ");
+           if (receiver_dump && ver == 2) Serial.print("     ");
+           if (receiver_dump && ver == 3) Serial.print("  ");
         }
         else Serial.print(' ');
       }
@@ -365,7 +374,8 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (collect_data2[bt] == 128 + 1) Serial.print('i');
           if (collect_data2[bt] == 128 - 1) Serial.print('o');
           if (collect_data2[bt] == 128) Serial.print('.');
-          if (receiver_dump) Serial.print("  ");
+           if (receiver_dump && ver == 2) Serial.print("     ");
+           if (receiver_dump && ver == 3) Serial.print("  ");
         }
         else Serial.print(' ');
       }
@@ -427,7 +437,8 @@ void Oregon_NR::capture(bool DEBUG_INFO)
           if (*rdt == 128 + 1) Serial.print('i');
           if (*rdt == 128 - 1) Serial.print('o');
           if (*rdt == 128) Serial.print('.');
-          if (receiver_dump) Serial.print("  ");
+           if (receiver_dump && ver == 2) Serial.print("     ");
+           if (receiver_dump && ver == 3) Serial.print("  ");
         }
         else Serial.print(' ');
           rdt++;
@@ -607,6 +618,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Извлекает из записи тактовую последовательности
 //Параметры: cdptr - указатель на записанную тактовую последовательность
+//Результат пишется в массив decode_tacts
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
   
@@ -617,24 +629,37 @@ void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
   byte* cdp = cdptr;        
   for(int bt = 0 ; bt < bitsize; bt++)
   {
-      if (ver == 2)  
+      if (ver == 2 && decode_method == 1)  
     {
-      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) > 0x03) decode_tacts[bt] = 1; // Такт 11 (В ИДЕАЛЕ 87, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 58 ДА 84)
-      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05) decode_tacts[bt] = 0; // Такт 00 (В ИДЕАЛЕ 00, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 30 ДА 03)
-      if ((*cdp & 0xf0) < 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
-      if ((*cdp & 0xf0) > 0x40 && (*cdp & 0x0f) < 0x02) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
-  //    if ((*cdp & 0xf0) > 0x50 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 1; // Такт 11 (В ИДЕАЛЕ 87, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 58 А 84)
-  //    if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x03) decode_tacts[bt] = 0; // Такт 00 (В ИДЕАЛЕ 00, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 30 ДА 03)
-  //    if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
-  //    if ((*cdp & 0xf0) > 0x40 && (*cdp & 0x0f) < 0x03) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
+      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) > 0x03) decode_tacts[bt] = 1;
+      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05) decode_tacts[bt] = 0;
+      if ((*cdp & 0xf0) < 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 4;
+      if ((*cdp & 0xf0) > 0x40 && (*cdp & 0x0f) < 0x02) decode_tacts[bt] = 3;
     }
-    if (ver == 3)  
+      if (ver == 2 && decode_method == 2)  
     {
-      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 1; // Такт 11 (В ИДЕАЛЕ 87, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 58 ДА 84)
-      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05) decode_tacts[bt] = 0; // Такт 00 (В ИДЕАЛЕ 00, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 30 ДА 03)
-      if ((*cdp & 0xf0) < 0x20 && (*cdp & 0x0f) > 0x02) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
-      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) < 0x02) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
+      if (*cdp == 0x88 || *cdp == 0x87  || *cdp == 0x86 || *cdp == 0x85 || *cdp == 0x84 || *cdp == 0x83 || *cdp == 0x78 ||  *cdp == 0x77 || *cdp == 0x68 || *cdp == 0x58 ) decode_tacts[bt] = 1;              // Такт 11 (В ИДЕАЛЕ 87, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 58 А 84)
+      if (*cdp == 0x00 || *cdp == 0x01  || *cdp == 0x02 || *cdp == 0x03 || *cdp == 0x10 || *cdp == 0x20 || *cdp == 0x30) decode_tacts[bt] = 0;                                                         // Такт 00 (В ИДЕАЛЕ 00, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 30 ДА 03)
+      if (*cdp == 0x05 || *cdp == 0x06  || *cdp == 0x07 || *cdp == 0x08 || *cdp == 0x15 || *cdp == 0x16 || *cdp == 0x17 || *cdp == 0x24 || *cdp == 0x25 || *cdp == 0x34 || *cdp == 0x35) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
+      if (*cdp == 0x50 || *cdp == 0x60  || *cdp == 0x70 || *cdp == 0x80 || *cdp == 0x51 || *cdp == 0x61 || *cdp == 0x71 || *cdp == 0x42 || *cdp == 0x52 || *cdp == 0x43 || *cdp == 0x53) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
     }
+    if (ver == 3 && decode_method == 1)  
+    {
+      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) > 0x04) decode_tacts[bt] = 1;
+      if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05) decode_tacts[bt] = 0;
+      if ((*cdp & 0xf0) < 0x20 && (*cdp & 0x0f) > 0x02) decode_tacts[bt] = 4;
+      if ((*cdp & 0xf0) > 0x20 && (*cdp & 0x0f) < 0x02) decode_tacts[bt] = 3;
+    }
+    if (ver == 3 && decode_method == 2)  
+    {
+      if (*cdp == 0x87 || *cdp == 0x86  || *cdp == 0x85 || *cdp == 0x84 || *cdp == 0x83 || *cdp == 0x82 || *cdp == 0x78 ||  *cdp == 0x77 || *cdp == 0x76 || *cdp == 0x68 || *cdp == 0x67 ) decode_tacts[bt] = 1;              // Такт 11 (В ИДЕАЛЕ 87, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 58 А 84)
+      if (*cdp == 0x00 || *cdp == 0x01  || *cdp == 0x02 || *cdp == 0x03 || *cdp == 0x10 || *cdp == 0x20 || *cdp == 0x30) decode_tacts[bt] = 0;                                                         // Такт 00 (В ИДЕАЛЕ 00, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ОТ 30 ДА 03)
+      if (*cdp == 0x05 || *cdp == 0x06  || *cdp == 0x07 || *cdp == 0x08 || *cdp == 0x15 || *cdp == 0x16 || *cdp == 0x17 || *cdp == 0x24 || *cdp == 0x25 || *cdp == 0x34 || *cdp == 0x35) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
+      if (*cdp == 0x50 || *cdp == 0x60  || *cdp == 0x70 || *cdp == 0x80 || *cdp == 0x51 || *cdp == 0x61 || *cdp == 0x71 || *cdp == 0x42 || *cdp == 0x52 || *cdp == 0x43 || *cdp == 0x53) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
+    }
+
+
+
 
    *cdp++;
   }
@@ -760,22 +785,22 @@ void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
 //Если преамбула распознана на несколько тактов уверенно, то можно судить о версии пакета
 
   //001100110011 -> v2
-  if (decode_tacts[0] == 0 && decode_tacts[1] == 1  && decode_tacts[2] == 0 && decode_tacts[3] == 1 && decode_tacts[4] == 0 && decode_tacts[5] == 1 && ver == 3){
+  if (/*decode_tacts[0] == 0 && decode_tacts[1] == 1  &&*/ decode_tacts[2] == 0 && decode_tacts[3] == 1 && decode_tacts[4] == 0 && decode_tacts[5] == 1 && ver == 3){
    ver = 2;
    restore_sign ^=4;
   }
   //110011001100 -> v2
-  if (decode_tacts[0] == 1 && decode_tacts[1] == 0  && decode_tacts[2] == 1 && decode_tacts[3] == 0 && decode_tacts[4] == 1 && decode_tacts[5] == 0 && ver == 3){
+  if (/*decode_tacts[0] == 1 && decode_tacts[1] == 0  &&*/ decode_tacts[2] == 1 && decode_tacts[3] == 0 && decode_tacts[4] == 1 && decode_tacts[5] == 0 && ver == 3){
    ver = 2;
    restore_sign ^=4;
   }
   //010101010101 -> v3
-  if (decode_tacts[0] == 4 && decode_tacts[1] == 4  && decode_tacts[2] == 4 && decode_tacts[3] == 4 && decode_tacts[4] == 4 && decode_tacts[5] == 4 && ver == 2){
+  if (/*decode_tacts[0] == 4 && decode_tacts[1] == 4  &&*/ decode_tacts[2] == 4 && decode_tacts[3] == 4 && decode_tacts[4] == 4 && decode_tacts[5] == 4 && ver == 2){
    ver = 3;
    restore_sign ^=4;
   }
   //101010101010 -> v3
-  if (decode_tacts[0] == 3 && decode_tacts[1] == 3  && decode_tacts[2] == 3 && decode_tacts[3] == 3 && decode_tacts[4] == 3 && decode_tacts[5] == 3 && ver == 2){
+  if (/*decode_tacts[0] == 3 && decode_tacts[1] == 3  &&*/ decode_tacts[2] == 3 && decode_tacts[3] == 3 && decode_tacts[4] == 3 && decode_tacts[5] == 3 && ver == 2){
    ver = 3;
    restore_sign ^=4;
   }
@@ -1000,8 +1025,19 @@ int Oregon_NR::collect(byte* cdptr){
     //Если уменьшить, возможно спутать с повреждением пакета
     //Если увеличить, то можно не прекратить чтение и начать записывать помехи
     if (nulls_found > empty_space ) return bt;
+
+
+
+
+
+
+
+
+
+
     /////////////////////////////////////////////
     //Ждём прихода времени следующего полутакта
+
     while (micros() < pre_marker);                    
   }
   return bt;

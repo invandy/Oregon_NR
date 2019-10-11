@@ -49,3 +49,5 @@ setHumidity	KEYWORD3
 setComfort	KEYWORD3
 transmit	KEYWORD3
 SendPacket	KEYWORD3
+timing_correction KEYWORD3
+decode_method   KEYWORD3

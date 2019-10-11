@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
 //
-// Last updated: 29 June 2019
+// Last updated: 11 October 2019
 //
 // The folowed sensors data format are supported.
 //
@@ -43,7 +43,7 @@
 //
 // Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0
 //
-// Последнее обновление 29 июня 2019
+// Последнее обновление 11 Октября 2019
 //
 // Поддерживается формат следующих датчиков
 //
@@ -98,6 +98,8 @@ class Oregon_TM
     byte SendBuffer[buffersize];
     byte protocol = 2;
     word sens_type = 0x0000;               
+    int timing_corrector2 = 4;
+    int timing_corrector3 = 2;
 
     Oregon_TM(byte); 
     Oregon_TM(); 
