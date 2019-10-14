@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
 //
-// Last updated: 11 October 2019
+// Last updated: 14 October 2019
 //
 // The folowed sensors data format are supported.
 //
@@ -41,7 +41,7 @@
 //
 // Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0
 //
-// Последнее обновление 11 Октября 2019
+// Последнее обновление 14 Октября 2019
 //
 // Поддерживается формат следующих датчиков
 //
@@ -657,10 +657,19 @@ void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
       if (*cdp == 0x05 || *cdp == 0x06  || *cdp == 0x07 || *cdp == 0x08 || *cdp == 0x15 || *cdp == 0x16 || *cdp == 0x17 || *cdp == 0x24 || *cdp == 0x25 || *cdp == 0x34 || *cdp == 0x35) decode_tacts[bt] = 4; // Такт 01 (В ИДЕАЛЕ 07, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 34)
       if (*cdp == 0x50 || *cdp == 0x60  || *cdp == 0x70 || *cdp == 0x80 || *cdp == 0x51 || *cdp == 0x61 || *cdp == 0x71 || *cdp == 0x42 || *cdp == 0x52 || *cdp == 0x43 || *cdp == 0x53) decode_tacts[bt] = 3; // Такт 10 (В ИДЕАЛЕ 70, НО ИЗ ЗА СДВИГА НА 3 ТАКТА МОЖЕТ БЫТЬ ДО 43)
     }
+      if (decode_method == 3)  
+    {
+      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) < 5)  decode_tacts[bt] = 0;
+      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) > 4 &&  (((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) < 10) 
+	{
+          if (((*cdp & 0xF0) >> 4) > (*cdp & 0xF0))  decode_tacts[bt] = 3;    
+          if (((*cdp & 0xF0) >> 4) < (*cdp & 0xF0))  decode_tacts[bt] = 4;  
+          if (((*cdp & 0xF0) >> 4) == (*cdp & 0xF0) && (*(cdp - 1) & 0x0F) < 4 )  decode_tacts[bt] = 4;  
+          if (((*cdp & 0xF0) >> 4) == (*cdp & 0xF0) && (*(cdp - 1) & 0x0F) > 4 )  decode_tacts[bt] = 3;  
+	}
+      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) > 10) decode_tacts[bt] = 1;
 
-
-
-
+    }
    *cdp++;
   }
 
