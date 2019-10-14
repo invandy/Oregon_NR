@@ -659,15 +659,15 @@ void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
     }
       if (decode_method == 3)  
     {
-      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) < 5)  decode_tacts[bt] = 0;
-      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) > 4 &&  (((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) < 10) 
+      if ((((*cdp) >> 4) + (*cdp & 0x0F)) < 5)  decode_tacts[bt] = 0;
+      if (((((*cdp) >> 4) + (*cdp & 0x0F)) > 4) && ((((*cdp) >> 4) + (*cdp & 0x0F)) < 10))
 	{
-          if (((*cdp & 0xF0) >> 4) > (*cdp & 0xF0))  decode_tacts[bt] = 3;    
-          if (((*cdp & 0xF0) >> 4) < (*cdp & 0xF0))  decode_tacts[bt] = 4;  
-          if (((*cdp & 0xF0) >> 4) == (*cdp & 0xF0) && (*(cdp - 1) & 0x0F) < 4 )  decode_tacts[bt] = 4;  
-          if (((*cdp & 0xF0) >> 4) == (*cdp & 0xF0) && (*(cdp - 1) & 0x0F) > 4 )  decode_tacts[bt] = 3;  
+          if (((*cdp) >> 4) > (*cdp & 0x0f))  decode_tacts[bt] = 3;    
+          if (((*cdp) >> 4) < (*cdp & 0x0f))  decode_tacts[bt] = 4;  
+          if (((*cdp) >> 4) == (*cdp & 0x0f) && (*(cdp - 1) & 0x0F) < 4 )  decode_tacts[bt] = 4;  
+          if (((*cdp) >> 4) == (*cdp & 0x0f) && (*(cdp - 1) & 0x0F) > 4 )  decode_tacts[bt] = 3;  
 	}
-      if ((((*cdp & 0xF0) >> 4) + (*cdp & 0x0F)) > 10) decode_tacts[bt] = 1;
+      if ((((*cdp) >> 4) + (*cdp & 0x0F)) > 10) decode_tacts[bt] = 1;
 
     }
    *cdp++;
