@@ -1,7 +1,7 @@
 #include "Oregon_TM.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. 
+// This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0.
 //
 // Last updated: 14 October 2019
 //
@@ -14,7 +14,7 @@
 
 // Receive only:
 // THN132N,
-// WGR800,	
+// WGR800,
 // UVN800.
 //
 // Aslo supported self-developed sensors. Please contact author for additional infromation.
@@ -24,7 +24,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2019 Sergey Zawislak 
+// Copyright (c) 2019 Sergey Zawislak
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -33,73 +33,72 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// ƒ‡ÌÌ‡ˇ ·Ë·ÎËÓÚÂÍ‡ ¿‰ÛËÌÓ ÔÂ‰Ì‡ÁÌ‡˜ÂÌ‡ ‰Îˇ ÔËÂÏ‡ Ë ÔÂÂ‰‡˜Ë ‰‡ÌÌ˚ı ‚ ÙÓÏ‡ÚÂ ·ÂÒÔÓ‚Ó‰ÌÓ„Ó ÔÓÚÓÍÓÎ‡ Oregon Scientific v2.1 Ë v3.0
+// –î–∞–Ω–Ω–∞—è –±–∏–±–ª–∏–æ—Ç–µ–∫–∞ –ê—Ä–¥—É–∏–Ω–æ –ø—Ä–µ–¥–Ω–∞–∑–Ω–∞—á–µ–Ω–∞ –¥–ª—è –ø—Ä–∏–µ–º–∞ –∏ –ø–µ—Ä–µ–¥–∞—á–∏ –¥–∞–Ω–Ω—ã—Ö –≤ —Ñ–æ—Ä–º–∞—Ç–µ –±–µ—Å–ø—Ä–æ–≤–æ–¥–Ω–æ–≥–æ –ø—Ä–æ—Ç–æ–∫–æ–ª–∞ Oregon Scientific v2.1 –∏ v3.0
 //
-// œÓÒÎÂ‰ÌÂÂ Ó·ÌÓ‚ÎÂÌËÂ 14 ŒÍÚˇ·ˇ 2019
+// –ü–æ—Å–ª–µ–¥–Ω–µ–µ –æ–±–Ω–æ–≤–ª–µ–Ω–∏–µ 14 –û–∫—Ç—è–±—Ä—è 2019
 //
-// œÓ‰‰ÂÊË‚‡ÂÚÒˇ ÙÓÏ‡Ú ÒÎÂ‰Û˛˘Ëı ‰‡Ú˜ËÍÓ‚
+// –ü–æ–¥–¥–µ—Ä–∂–∏–≤–∞–µ—Ç—Å—è —Ñ–æ—Ä–º–∞—Ç —Å–ª–µ–¥—É—é—â–∏—Ö –¥–∞—Ç—á–∏–∫–æ–≤
 //
-// œË∏Ï Ë ÔÂÂ‰‡˜‡:
+// –ü—Ä–∏—ë–º –∏ –ø–µ—Ä–µ–¥–∞—á–∞:
 // THGN132N (THGR122N, THGN123N),
 // RTGN318,
 // THGR810.
 
-// “ÓÎ¸ÓÍ ÔË∏Ï:
+// –¢–æ–ª—å–æ–∫ –ø—Ä–∏—ë–º:
 // THN132N,
-// WGR800,	
+// WGR800,
 // UVN800.
 //
-// “‡ÍÊÂ ÔÓ‰‰ÂÊË‚‡˛ÚÒˇ ‰‡Ú˜ËÍË ÒÓ·ÒÚ‚ÂÌÌÓÈ ‡Á‡·ÓÚÍË (Á‡ ‰ÓÔÓÎÌËÚÂÎ¸ÌÓÈ ‰ÓÍÛÏÂÌÚ‡ˆÂÈ Ó·‡˘‡Ú¸Òˇ Í ‡‚ÚÓÛ)
+// –¢–∞–∫–∂–µ –ø–æ–¥–¥–µ—Ä–∂–∏–≤–∞—é—Ç—Å—è –¥–∞—Ç—á–∏–∫–∏ —Å–æ–±—Å—Ç–≤–µ–Ω–Ω–æ–π —Ä–∞–∑—Ä–∞–±–æ—Ç–∫–∏ (–∑–∞ –¥–æ–ø–æ–ª–Ω–∏—Ç–µ–ª—å–Ω–æ–π –¥–æ–∫—É–º–µ–Ω—Ç–∞—Ü–µ–π –æ–±—Ä–∞—â–∞—Ç—å—Å—è –∫ –∞–≤—Ç–æ—Ä—É)
 //
-//  ›ÚÓÚ Ù‡ÈÎ - ˜‡ÒÚ¸ ·Ë·ÎËÓÚÂÍË OREGON_NR
+// –≠—Ç–æ—Ç —Ñ–∞–π–ª - —á–∞—Å—Ç—å –±–∏–±–ª–∏–æ—Ç–µ–∫–∏ OREGON_NR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2019 —Â„ÂÈ «‡‚ËÒÎˇÍ
+// Copyright (c) 2019 –°–µ—Ä–≥–µ–π –ó–∞–≤–∏—Å–ª—è–∫
 //
-// ƒ‡ÌÌ‡ˇ ÎËˆÂÌÁËˇ ‡ÁÂ¯‡ÂÚ ÎËˆ‡Ï, ÔÓÎÛ˜Ë‚¯ËÏ ÍÓÔË˛ ‰‡ÌÌÓ„Ó ÔÓ„‡ÏÏÌÓ„Ó Ó·ÂÒÔÂ˜ÂÌËˇ Ë ÒÓÔÛÚÒÚ‚Û˛˘ÂÈ ‰ÓÍÛÏÂÌÚ‡ˆËË 
-// (‚ ‰‡Î¸ÌÂÈ¯ÂÏ ËÏÂÌÛÂÏ˚ÏË ´œÓ„‡ÏÏÌÓÂ Œ·ÂÒÔÂ˜ÂÌËÂª), ·ÂÁ‚ÓÁÏÂÁ‰ÌÓ ËÒÔÓÎ¸ÁÓ‚‡Ú¸ œÓ„‡ÏÏÌÓÂ Œ·ÂÒÔÂ˜ÂÌËÂ ·ÂÁ Ó„‡ÌË˜ÂÌËÈ,
-// ‚ÍÎ˛˜‡ˇ ÌÂÓ„‡ÌË˜ÂÌÌÓÂ Ô‡‚Ó Ì‡ ËÒÔÓÎ¸ÁÓ‚‡ÌËÂ, ÍÓÔËÓ‚‡ÌËÂ, ËÁÏÂÌÂÌËÂ, ÒÎËˇÌËÂ, ÔÛ·ÎËÍ‡ˆË˛, ‡ÒÔÓÒÚ‡ÌÂÌËÂ, ÒÛ·ÎËˆÂÌÁËÓ‚‡ÌËÂ
-// Ë/ËÎË ÔÓ‰‡ÊÛ ÍÓÔËÈ œÓ„‡ÏÏÌÓ„Ó Œ·ÂÒÔÂ˜ÂÌËˇ, ‡ Ú‡ÍÊÂ ÎËˆ‡Ï, ÍÓÚÓ˚Ï ÔÂ‰ÓÒÚ‡‚ÎˇÂÚÒˇ ‰‡ÌÌÓÂ œÓ„‡ÏÏÌÓÂ Œ·ÂÒÔÂ˜ÂÌËÂ, ÔË ÒÓ·Î˛‰ÂÌËË ÒÎÂ‰Û˛˘Ëı ÛÒÎÓ‚ËÈ:
+// –î–∞–Ω–Ω–∞—è –ª–∏—Ü–µ–Ω–∑–∏—è —Ä–∞–∑—Ä–µ—à–∞–µ—Ç –ª–∏—Ü–∞–º, –ø–æ–ª—É—á–∏–≤—à–∏–º –∫–æ–ø–∏—é –¥–∞–Ω–Ω–æ–≥–æ –ø—Ä–æ–≥—Ä–∞–º–º–Ω–æ–≥–æ –æ–±–µ—Å–ø–µ—á–µ–Ω–∏—è –∏ —Å–æ–ø—É—Ç—Å—Ç–≤—É—é—â–µ–π –¥–æ–∫—É–º–µ–Ω—Ç–∞—Ü–∏–∏
+// (–≤ –¥–∞–ª—å–Ω–µ–π—à–µ–º –∏–º–µ–Ω—É–µ–º—ã–º–∏ ¬´–ü—Ä–æ–≥—Ä–∞–º–º–Ω–æ–µ –û–±–µ—Å–ø–µ—á–µ–Ω–∏–µ¬ª), –±–µ–∑–≤–æ–∑–º–µ–∑–¥–Ω–æ –∏—Å–ø–æ–ª—å–∑–æ–≤–∞—Ç—å –ü—Ä–æ–≥—Ä–∞–º–º–Ω–æ–µ –û–±–µ—Å–ø–µ—á–µ–Ω–∏–µ –±–µ–∑ –æ–≥—Ä–∞–Ω–∏—á–µ–Ω–∏–π,
+// –≤–∫–ª—é—á–∞—è –Ω–µ–æ–≥—Ä–∞–Ω–∏—á–µ–Ω–Ω–æ–µ –ø—Ä–∞–≤–æ –Ω–∞ –∏—Å–ø–æ–ª—å–∑–æ–≤–∞–Ω–∏–µ, –∫–æ–ø–∏—Ä–æ–≤–∞–Ω–∏–µ, –∏–∑–º–µ–Ω–µ–Ω–∏–µ, —Å–ª–∏—è–Ω–∏–µ, –ø—É–±–ª–∏–∫–∞—Ü–∏—é, —Ä–∞—Å–ø—Ä–æ—Å—Ç—Ä–∞–Ω–µ–Ω–∏–µ, —Å—É–±–ª–∏—Ü–µ–Ω–∑–∏—Ä–æ–≤–∞–Ω–∏–µ
+// –∏/–∏–ª–∏ –ø—Ä–æ–¥–∞–∂—É –∫–æ–ø–∏–π –ü—Ä–æ–≥—Ä–∞–º–º–Ω–æ–≥–æ –û–±–µ—Å–ø–µ—á–µ–Ω–∏—è, –∞ —Ç–∞–∫–∂–µ –ª–∏—Ü–∞–º, –∫–æ—Ç–æ—Ä—ã–º –ø—Ä–µ–¥–æ—Å—Ç–∞–≤–ª—è–µ—Ç—Å—è –¥–∞–Ω–Ω–æ–µ –ü—Ä–æ–≥—Ä–∞–º–º–Ω–æ–µ –û–±–µ—Å–ø–µ—á–µ–Ω–∏–µ, –ø—Ä–∏ —Å–æ–±–ª—é–¥–µ–Ω–∏–∏ —Å–ª–µ–¥—É—é—â–∏—Ö —É—Å–ª–æ–≤–∏–π:
 //
-// ”Í‡Á‡ÌÌÓÂ ‚˚¯Â Û‚Â‰ÓÏÎÂÌËÂ Ó· ‡‚ÚÓÒÍÓÏ Ô‡‚Â Ë ‰‡ÌÌ˚Â ÛÒÎÓ‚Ëˇ ‰ÓÎÊÌ˚ ·˚Ú¸ ‚ÍÎ˛˜ÂÌ˚ ‚Ó ‚ÒÂ ÍÓÔËË ËÎË ÁÌ‡˜ËÏ˚Â ˜‡ÒÚË ‰‡ÌÌÓ„Ó œÓ„‡ÏÏÌÓ„Ó Œ·ÂÒÔÂ˜ÂÌËˇ.
+// –£–∫–∞–∑–∞–Ω–Ω–æ–µ –≤—ã—à–µ —É–≤–µ–¥–æ–º–ª–µ–Ω–∏–µ –æ–± –∞–≤—Ç–æ—Ä—Å–∫–æ–º –ø—Ä–∞–≤–µ –∏ –¥–∞–Ω–Ω—ã–µ —É—Å–ª–æ–≤–∏—è –¥–æ–ª–∂–Ω—ã –±—ã—Ç—å –≤–∫–ª—é—á–µ–Ω—ã –≤–æ –≤—Å–µ –∫–æ–ø–∏–∏ –∏–ª–∏ –∑–Ω–∞—á–∏–º—ã–µ —á–∞—Å—Ç–∏ –¥–∞–Ω–Ω–æ–≥–æ –ü—Ä–æ–≥—Ä–∞–º–º–Ω–æ–≥–æ –û–±–µ—Å–ø–µ—á–µ–Ω–∏—è.
 //
-// ƒ¿ÕÕŒ≈ œ–Œ√–¿ÃÃÕŒ≈ Œ¡≈—œ≈◊≈Õ»≈ œ–≈ƒŒ—“¿¬Àﬂ≈“—ﬂ ´ ¿  ≈—“‹ª, ¡≈«  ¿ »’-À»¡Œ √¿–¿Õ“»…, ﬂ¬ÕŒ ¬€–¿∆≈ÕÕ€’ »À» œŒƒ–¿«”Ã≈¬¿≈Ã€’, ¬ Àﬁ◊¿ﬂ √¿–¿Õ“»» “Œ¬¿–ÕŒ… 
-// œ–»√ŒƒÕŒ—“», —ŒŒ“¬≈“—“¬»ﬂ œŒ ≈√Œ  ŒÕ –≈“ÕŒÃ” Õ¿«Õ¿◊≈Õ»ﬁ » Œ“—”“—“¬»ﬂ Õ¿–”ÿ≈Õ»…, ÕŒ Õ≈ Œ√–¿Õ»◊»¬¿ﬂ—‹ »Ã». Õ» ¬  ¿ ŒÃ —À”◊¿≈ ¿¬“Œ–€ »À» œ–¿¬ŒŒ¡À¿ƒ¿“≈À» 
-// Õ≈ Õ≈—”“ Œ“¬≈“—“¬≈ÕÕŒ—“» œŒ  ¿ »Ã-À»¡Œ »— ¿Ã, «¿ ”Ÿ≈–¡ »À» œŒ »Õ€Ã “–≈¡Œ¬¿Õ»ﬂÃ, ¬ “ŒÃ ◊»—À≈, œ–» ƒ≈…—“¬»»  ŒÕ“–¿ “¿, ƒ≈À» “≈ »À» »ÕŒ… —»“”¿÷»», 
-// ¬Œ«Õ» ÿ»Ã »«-«¿ »—œŒÀ‹«Œ¬¿Õ»ﬂ œ–Œ√–¿ÃÃÕŒ√Œ Œ¡≈—œ≈◊≈Õ»ﬂ »À» »Õ€’ ƒ≈…—“¬»… — œ–Œ√–¿ÃÃÕ€Ã Œ¡≈—œ≈◊≈Õ»≈Ã. 
+// –î–ê–ù–ù–û–ï –ü–†–û–ì–†–ê–ú–ú–ù–û–ï –û–ë–ï–°–ü–ï–ß–ï–ù–ò–ï –ü–†–ï–î–û–°–¢–ê–í–õ–Ø–ï–¢–°–Ø ¬´–ö–ê–ö –ï–°–¢–¨¬ª, –ë–ï–ó –ö–ê–ö–ò–•-–õ–ò–ë–û –ì–ê–†–ê–ù–¢–ò–ô, –Ø–í–ù–û –í–´–†–ê–ñ–ï–ù–ù–´–• –ò–õ–ò –ü–û–î–†–ê–ó–£–ú–ï–í–ê–ï–ú–´–•, –í–ö–õ–Æ–ß–ê–Ø –ì–ê–†–ê–ù–¢–ò–ò –¢–û–í–ê–†–ù–û–ô
+// –ü–†–ò–ì–û–î–ù–û–°–¢–ò, –°–û–û–¢–í–ï–¢–°–¢–í–ò–Ø –ü–û –ï–ì–û –ö–û–ù–ö–†–ï–¢–ù–û–ú–£ –ù–ê–ó–ù–ê–ß–ï–ù–ò–Æ –ò –û–¢–°–£–¢–°–¢–í–ò–Ø –ù–ê–†–£–®–ï–ù–ò–ô, –ù–û –ù–ï –û–ì–†–ê–ù–ò–ß–ò–í–ê–Ø–°–¨ –ò–ú–ò. –ù–ò –í –ö–ê–ö–û–ú –°–õ–£–ß–ê–ï –ê–í–¢–û–†–´ –ò–õ–ò –ü–†–ê–í–û–û–ë–õ–ê–î–ê–¢–ï–õ–ò
+// –ù–ï –ù–ï–°–£–¢ –û–¢–í–ï–¢–°–¢–í–ï–ù–ù–û–°–¢–ò –ü–û –ö–ê–ö–ò–ú-–õ–ò–ë–û –ò–°–ö–ê–ú, –ó–ê –£–©–ï–†–ë –ò–õ–ò –ü–û –ò–ù–´–ú –¢–†–ï–ë–û–í–ê–ù–ò–Ø–ú, –í –¢–û–ú –ß–ò–°–õ–ï, –ü–†–ò –î–ï–ô–°–¢–í–ò–ò –ö–û–ù–¢–†–ê–ö–¢–ê, –î–ï–õ–ò–ö–¢–ï –ò–õ–ò –ò–ù–û–ô –°–ò–¢–£–ê–¶–ò–ò,
+// –í–û–ó–ù–ò–ö–®–ò–ú –ò–ó-–ó–ê –ò–°–ü–û–õ–¨–ó–û–í–ê–ù–ò–Ø –ü–†–û–ì–†–ê–ú–ú–ù–û–ì–û –û–ë–ï–°–ü–ï–ß–ï–ù–ò–Ø –ò–õ–ò –ò–ù–´–• –î–ï–ô–°–¢–í–ò–ô –° –ü–†–û–ì–†–ê–ú–ú–ù–´–ú –û–ë–ï–°–ü–ï–ß–ï–ù–ò–ï–ú.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
-// ÓÌÒÚÛÍÚÓ
+//–ö–æ–Ω—Å—Ç—Ä—É–∫—Ç–æ—Ä
 Oregon_TM::Oregon_TM(byte tr_pin)
 {
   TX_PIN = tr_pin;
-  pinMode(TX_PIN, OUTPUT); 
+  pinMode(TX_PIN, OUTPUT);
   digitalWrite(TX_PIN, LOW);
-
 }
 
 Oregon_TM::Oregon_TM(void)
 {
-  pinMode(TX_PIN, OUTPUT); 
+  pinMode(TX_PIN, OUTPUT);
   digitalWrite(TX_PIN, LOW);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// ‘ÛÌÍˆËË ÔÂÂ‰‡Ú˜ËÍ‡////////////////////////////////////////////////////////////////////////////
+// –§—É–Ω–∫—Ü–∏–∏ –ø–µ—Ä–µ–¥–∞—Ç—á–∏–∫–∞////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::sendZero(void)
 {
-  if (protocol == 2){
+  if (protocol == 2) {
     while (time_marker + TR_TIME * 4 >= micros());
     time_marker += TR_TIME * 4;
     digitalWrite(TX_PIN, HIGH);
@@ -108,19 +107,18 @@ void Oregon_TM::sendZero(void)
     delayMicroseconds(TWOTR_TIME + PULSE_SHORTEN_2);
     digitalWrite(TX_PIN, HIGH);
   }
-  if (protocol == 3)
-    {
-      if (prevstate) while (time_marker + TWOTR_TIME - PULSE_SHORTEN_3 >= micros());
-      else while (time_marker + TWOTR_TIME >= micros());
-      
+  if (protocol == 3) {
+    if (prevstate) while (time_marker + TWOTR_TIME - PULSE_SHORTEN_3 >= micros());
+    else while (time_marker + TWOTR_TIME >= micros());
+
     time_marker += TWOTR_TIME;
-    
+
     if (prevbit && prevstate)
     {
       digitalWrite(TX_PIN, LOW);
       prevstate = 0;
       prevbit = 0;
-      return;            
+      return;
     }
     if (prevbit && !prevstate)
     {
@@ -128,7 +126,7 @@ void Oregon_TM::sendZero(void)
       delayMicroseconds(TWOTR_TIME);
       prevstate = 1;
       prevbit = 0;
-      return;                  
+      return;
     }
     if (!prevbit && prevstate)
     {
@@ -136,7 +134,7 @@ void Oregon_TM::sendZero(void)
       delayMicroseconds(TR_TIME);
       digitalWrite(TX_PIN, HIGH);
       prevbit = 0;
-      return;                  
+      return;
     }
     if (!prevbit && !prevstate)
     {
@@ -144,7 +142,7 @@ void Oregon_TM::sendZero(void)
       delayMicroseconds(TR_TIME);
       digitalWrite(TX_PIN, LOW);
       prevbit = 0;
-      return;                  
+      return;
     }
   }
 }
@@ -152,7 +150,7 @@ void Oregon_TM::sendZero(void)
 
 void Oregon_TM::sendOne(void)
 {
-  if (protocol == 2){
+  if (protocol == 2) {
     while (time_marker + TR_TIME * 4 - PULSE_SHORTEN_2>= micros());
     time_marker += TR_TIME * 4;
     digitalWrite(TX_PIN, LOW);
@@ -161,13 +159,12 @@ void Oregon_TM::sendOne(void)
     delayMicroseconds(TWOTR_TIME - PULSE_SHORTEN_2);
     digitalWrite(TX_PIN, LOW);
   }
-  
-  if (protocol == 3)
-  {
+
+  if (protocol == 3) {
     if (prevstate) while (time_marker + TWOTR_TIME - PULSE_SHORTEN_3 >= micros());
     else while (time_marker + TWOTR_TIME >= micros());
     time_marker += TWOTR_TIME;
-    
+
     if (!prevbit && prevstate)
     {
       digitalWrite(TX_PIN, LOW);
@@ -180,7 +177,7 @@ void Oregon_TM::sendOne(void)
       digitalWrite(TX_PIN, HIGH);
       prevstate = 1;
       prevbit = 1;
-      return;      
+      return;
     }
     if (prevbit && prevstate)
     {
@@ -188,7 +185,7 @@ void Oregon_TM::sendOne(void)
       delayMicroseconds(TR_TIME);
       digitalWrite(TX_PIN, HIGH);
       prevbit = 1;
-      return;      
+      return;
     }
     if (prevbit && !prevstate)
     {
@@ -196,9 +193,8 @@ void Oregon_TM::sendOne(void)
       delayMicroseconds(TR_TIME);
       digitalWrite(TX_PIN, LOW);
       prevbit = 1;
-      return;      
+      return;
     }
-    
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,20 +205,18 @@ void Oregon_TM::sendMSB(byte data)
   (bitRead(data, 5)) ? sendOne() : sendZero();
   (bitRead(data, 6)) ? sendOne() : sendZero();
   (bitRead(data, 7)) ? sendOne() : sendZero();
-  if (protocol == 2) time_marker += timing_corrector2;       //œÓÔ‡‚Í‡ Ì‡ ‡ÁÌËˆÛ Ú‡ÍÚÓ‚˚ı ˜‡ÒÚÓÚ 1024.07√ˆ Ë 1024.60√ˆ
+  if (protocol == 2) time_marker += timing_corrector2; //–ü–æ–ø—Ä–∞–≤–∫–∞ –Ω–∞ —Ä–∞–∑–Ω–∏—Ü—É —Ç–∞–∫—Ç–æ–≤—ã—Ö —á–∞—Å—Ç–æ—Ç 1024.07–ì—Ü –∏ 1024.60–ì—Ü
   if (protocol == 3) time_marker += timing_corrector3;
-                     
-  
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
- 
+
 void Oregon_TM::sendLSB(byte data)
 {
   (bitRead(data, 0)) ? sendOne() : sendZero();
   (bitRead(data, 1)) ? sendOne() : sendZero();
   (bitRead(data, 2)) ? sendOne() : sendZero();
   (bitRead(data, 3)) ? sendOne() : sendZero();
-  if (protocol == 2) time_marker += timing_corrector2;       //œÓÔ‡‚Í‡ Ì‡ ‡ÁÌËˆÛ Ú‡ÍÚÓ‚˚ı ˜‡ÒÚÓÚ 1024.07√ˆ Ë 1024.60√ˆ
+  if (protocol == 2) time_marker += timing_corrector2; //–ü–æ–ø—Ä–∞–≤–∫–∞ –Ω–∞ —Ä–∞–∑–Ω–∏—Ü—É —Ç–∞–∫—Ç–æ–≤—ã—Ö —á–∞—Å—Ç–æ—Ç 1024.07–ì—Ü –∏ 1024.60–ì—Ü
   if (protocol == 3) time_marker += timing_corrector3;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,33 +228,33 @@ void Oregon_TM::sendData()
     sendMSB(SendBuffer[i]);
     if (i < 9)
     sendLSB(SendBuffer[i]);
-  if (protocol == 2) time_marker += 4;       //œÓÔ‡‚Í‡ Ì‡ ‡ÁÌËˆÛ Ú‡ÍÚÓ‚˚ı ˜‡ÒÚÓÚ 1024.07√ˆ Ë 1024.60√ˆ
-  //if (protocol == 3) time_marker += 4;
-    //œÓÔ‡‚Í‡ Ì‡ ‡ÁÌËˆÛ Ú‡ÍÚÓ‚˚ı ˜‡ÒÚÓÚ 1024.07√ˆ Ë 1024√ˆ
+    if (protocol == 2) time_marker += 4; //–ü–æ–ø—Ä–∞–≤–∫–∞ –Ω–∞ —Ä–∞–∑–Ω–∏—Ü—É —Ç–∞–∫—Ç–æ–≤—ã—Ö —á–∞—Å—Ç–æ—Ç 1024.07–ì—Ü –∏ 1024.60–ì—Ü
+    //if (protocol == 3) time_marker += 4;
+    //–ü–æ–ø—Ä–∞–≤–∫–∞ –Ω–∞ —Ä–∞–∑–Ω–∏—Ü—É —Ç–∞–∫—Ç–æ–≤—ã—Ö —á–∞—Å—Ç–æ—Ç 1024.07–ì—Ü –∏ 1024–ì—Ü
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
- 
+
 void Oregon_TM::sendOregon()
 {
-    time_marker=micros();
-    sendPreamble();
-    sendLSB(0xA);
-    sendData();
+  time_marker=micros();
+  sendPreamble();
+  sendLSB(0xA);
+  sendData();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::sendPreamble(void)
 {
-  if (protocol == 2){
+  if (protocol == 2) {
     sendLSB(0xF);
     sendLSB(0xF);
-    time_marker += 9; 
+    time_marker += 9;
     sendLSB(0xF);
     sendLSB(0xF);
     time_marker += 9;
   }
-  if (protocol == 3){
+  if (protocol == 3) {
     sendLSB(0xF);
     sendLSB(0xF);
     sendLSB(0xF);
@@ -273,7 +267,7 @@ void Oregon_TM::sendPreamble(void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
- 
+
 void Oregon_TM::calculateAndSetChecksum132(void)
 {
   byte CCIT_POLY = 0x07;
@@ -283,7 +277,7 @@ void Oregon_TM::calculateAndSetChecksum132(void)
   byte summ = 0x00;
   byte crc = 0x3C;
   byte cur_nible;
-  for(int i = 0; i<8; i++) 
+  for(int i = 0; i<8; i++)
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
@@ -293,7 +287,7 @@ void Oregon_TM::calculateAndSetChecksum132(void)
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-    }  
+    }
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
     if (i !=2)
@@ -302,7 +296,7 @@ void Oregon_TM::calculateAndSetChecksum132(void)
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-    }  
+    }
   }
   SendBuffer[7] += summ & 0x0F;
   SendBuffer[8] += summ & 0xF0;
@@ -320,7 +314,7 @@ void Oregon_TM::calculateAndSetChecksum318()
   byte summ = 0x00;
   byte crc = 0x00;
   byte cur_nible;
-  for(int i = 0; i<8; i++) 
+  for(int i = 0; i<8; i++)
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
@@ -330,7 +324,7 @@ void Oregon_TM::calculateAndSetChecksum318()
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-    }  
+    }
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
     if (i !=2)
@@ -339,7 +333,7 @@ void Oregon_TM::calculateAndSetChecksum318()
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-    }  
+    }
   }
   SendBuffer[7] += summ & 0x0F;
   SendBuffer[8] += summ & 0xF0;
@@ -360,25 +354,24 @@ void Oregon_TM::calculateAndSetChecksum810()
   for(int j = 0; j < 4; j++)
   if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
   else crc <<= 1;
-  
-  for(int i = 0; i<8; i++) 
+
+  for(int i = 0; i<8; i++)
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
-   
-      crc ^= cur_nible;
-      for(int j = 0; j < 4; j++)
-      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
-      else crc <<= 1;
-   
+
+    crc ^= cur_nible;
+    for(int j = 0; j < 4; j++)
+    if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+    else crc <<= 1;
+
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
-   
-      crc ^= cur_nible;
-      for(int j = 0; j < 4; j++)
-      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
-      else crc <<= 1;
-   
+
+    crc ^= cur_nible;
+    for(int j = 0; j < 4; j++)
+    if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+    else crc <<= 1;
   }
   SendBuffer[7] += summ & 0x0F;
   SendBuffer[8] += summ & 0xF0;
@@ -398,10 +391,10 @@ void Oregon_TM::SendPacket()
   if (sens_type == THP)
     calculateAndSetChecksumTHP();
 
-  
+
   sendOregon();
   digitalWrite(TX_PIN, LOW);
-  if (protocol == 2){
+  if (protocol == 2) {
     delayMicroseconds(TWOTR_TIME*15);
     sendOregon();
     digitalWrite(TX_PIN, LOW);
@@ -409,298 +402,289 @@ void Oregon_TM::SendPacket()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// ‘ÛÌÍˆËË ÍÓ‰ËÓ‚‡ÌËˇ ‰‡ÌÌ˚ı//////////////////////////////////////////////////////////////////////
+// –§—É–Ω–∫—Ü–∏–∏ –∫–æ–¥–∏—Ä–æ–≤–∞–Ω–∏—è –¥–∞–Ω–Ω—ã—Ö//////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setType(word type)
+{
+  sens_type = type;
+  if (type == THP)
   {
-    sens_type = type;
-    if (type == THP)
-    {
-      SendBuffer[0] = 0x55;
-      return;
-    }
-    SendBuffer[0] = (type & 0xFF00) >> 8;
-    SendBuffer[1] = type & 0x00FF;
+    SendBuffer[0] = 0x55;
+    return;
   }
+  SendBuffer[0] = (type & 0xFF00) >> 8;
+  SendBuffer[1] = type & 0x00FF;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setChannel(byte channel)
+{
+  byte channel_code;
+  if (sens_type == THGN132)
   {
-    byte channel_code;
-    if (sens_type == THGN132)
+    if (channel <= 1)
     {
-      if (channel <= 1) 
-      {
-        channel_code = 0x10; 
-        setId(0xE3);
-        send_time = 39000;
-      }
-      if (channel == 2) 
-      {
-        channel_code = 0x20; 
-        setId(0xE3);
-        send_time = 41000;
-      }
-      if (channel == 3) 
-      {
-        channel_code = 0x40; 
-        setId(0xBB);
-        send_time = 43000;
-      }
-      protocol = 2;
+      channel_code = 0x10;
+      setId(0xE3);
+      send_time = 39000;
     }
-
-    if (sens_type == RTGN318)
+    if (channel == 2)
     {
-
-      if (channel <= 1) 
-      {
-        channel_code = 0x10; 
-        setId(0xF1);
-        send_time = 53000;
-      }
-      if (channel == 2) 
-      {
-        channel_code = 0x20; 
-        setId(0x92);
-        send_time = 59000;
-      }
-      if (channel == 3) 
-      {
-        channel_code = 0x30; 
-        setId(0xAA);
-        send_time = 61000;
-      }
-
-      if (channel == 4) 
-      {
-        channel_code = 0x40; 
-        setId(0x8A);
-        send_time = 67000;
-      }
-      
-      if (channel >= 5) 
-      {
-        channel_code = 0x50; 
-        setId(0xB1);
-        send_time = 71000;
-      }
-      protocol = 2;
+      channel_code = 0x20;
+      setId(0xE3);
+      send_time = 41000;
     }
-
-if (sens_type == THGR810)
+    if (channel == 3)
     {
-      if (channel <= 1) 
-      {
-        channel_code = 0x10; 
-        setId(0xCB);
-        send_time = 53000;
-      }
-      if (channel == 2) 
-      {
-        channel_code = 0x20; 
-        setId(0x69);
-        send_time = 59000;
-      }
-      if (channel == 3) 
-      {
-        channel_code = 0x30; 
-        setId(0xAA);
-        send_time = 61000;
-      }
-      if (channel == 4) 
-      {
-        channel_code = 0x40; 
-        setId(0x8A);
-        send_time = 67000;
-      }
-      if (channel == 5) 
-      {
-        channel_code = 0x50; 
-        setId(0xB1);
-        send_time = 71000;
-      }
-      if (channel == 6) 
-      {
-        channel_code = 0x60; 
-        send_time = 79000;
-      }
-      if (channel == 7) 
-      {
-        channel_code = 0x70; 
-        send_time = 83000;
-      }
-      if (channel == 8) 
-      {
-        channel_code = 0x80; 
-        send_time = 87000;
-      }
-      if (channel == 9) 
-      {
-        channel_code = 0x90; 
-        send_time = 91000;
-      }
-      if (channel >= 10) 
-      {
-        channel_code = 0xA0; 
-        send_time = 93000;
-      }
-      protocol = 3;
+      channel_code = 0x40;
+      setId(0xBB);
+      send_time = 43000;
     }
-      SendBuffer[2]&= 0x0F;
-      SendBuffer[2] += channel_code & 0xF0;
+    protocol = 2;
   }
+
+  if (sens_type == RTGN318)
+  {
+    if (channel <= 1)
+    {
+      channel_code = 0x10;
+      setId(0xF1);
+      send_time = 53000;
+    }
+    if (channel == 2)
+    {
+      channel_code = 0x20;
+      setId(0x92);
+      send_time = 59000;
+    }
+    if (channel == 3)
+    {
+      channel_code = 0x30;
+      setId(0xAA);
+      send_time = 61000;
+    }
+    if (channel == 4)
+    {
+      channel_code = 0x40;
+      setId(0x8A);
+      send_time = 67000;
+    }
+    if (channel >= 5)
+    {
+      channel_code = 0x50;
+      setId(0xB1);
+      send_time = 71000;
+    }
+    protocol = 2;
+  }
+
+  if (sens_type == THGR810)
+  {
+    if (channel <= 1)
+    {
+      channel_code = 0x10;
+      setId(0xCB);
+      send_time = 53000;
+    }
+    if (channel == 2)
+    {
+      channel_code = 0x20;
+      setId(0x69);
+      send_time = 59000;
+    }
+    if (channel == 3)
+    {
+      channel_code = 0x30;
+      setId(0xAA);
+      send_time = 61000;
+    }
+    if (channel == 4)
+    {
+      channel_code = 0x40;
+      setId(0x8A);
+      send_time = 67000;
+    }
+    if (channel == 5)
+    {
+      channel_code = 0x50;
+      setId(0xB1);
+      send_time = 71000;
+    }
+    if (channel == 6)
+    {
+      channel_code = 0x60;
+      send_time = 79000;
+    }
+    if (channel == 7)
+    {
+      channel_code = 0x70;
+      send_time = 83000;
+    }
+    if (channel == 8)
+    {
+      channel_code = 0x80;
+      send_time = 87000;
+    }
+    if (channel == 9)
+    {
+      channel_code = 0x90;
+      send_time = 91000;
+    }
+    if (channel >= 10)
+    {
+      channel_code = 0xA0;
+      send_time = 93000;
+    }
+    protocol = 3;
+  }
+  SendBuffer[2]&= 0x0F;
+  SendBuffer[2] += channel_code & 0xF0;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setId(byte ID)
-  {
-    SendBuffer[2]&= 0xF0;
-    SendBuffer[2] += (ID & 0xF0) >> 4;
-    SendBuffer[3]&= 0x0F;
-    SendBuffer[3] += (ID & 0x0F) << 4;
-  }
+{
+  SendBuffer[2]&= 0xF0;
+  SendBuffer[2] += (ID & 0xF0) >> 4;
+  SendBuffer[3]&= 0x0F;
+  SendBuffer[3] += (ID & 0x0F) << 4;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setBatteryFlag(bool level)
-  {
-    SendBuffer[3] &= 0xFB;
-    if (level) SendBuffer[3] |= 0x04;
-  }
+{
+  SendBuffer[3] &= 0xFB;
+  if (level) SendBuffer[3] |= 0x04;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setStartCount(byte startcount)
-  {
-     SendBuffer[3] &= 0xF4;
-    if (startcount == 8) SendBuffer[3] |= 0x08;
-    if (startcount == 2) SendBuffer[3] |= 0x02;
-    if (startcount == 1) SendBuffer[3] |= 0x01;
-  }
+{
+  SendBuffer[3] &= 0xF4;
+  if (startcount == 8) SendBuffer[3] |= 0x08;
+  if (startcount == 2) SendBuffer[3] |= 0x02;
+  if (startcount == 1) SendBuffer[3] |= 0x01;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
 void Oregon_TM::setTemperature(float temp)
+{
+  if(temp < 0)
   {
-    if(temp < 0)
-    {
-      SendBuffer[5] = 0x08;
-      temp *= -1;
-    }
-    else
-    {
-      SendBuffer[5] = 0x00;
-    }
-    byte tempInt = (byte) temp;
-    byte td = (tempInt / 10);
-    byte tf = tempInt - td * 10;
-    byte tempFloat = (temp - (float)tempInt) * 10;
-    
-    SendBuffer[5] += (td << 4);
-    SendBuffer[4] = tf;
-    SendBuffer[4] |= (tempFloat << 4);
+    SendBuffer[5] = 0x08;
+    temp *= -1;
   }
+  else
+  {
+    SendBuffer[5] = 0x00;
+  }
+  byte tempInt = (byte) temp;
+  byte td = (tempInt / 10);
+  byte tf = tempInt - td * 10;
+  byte tempFloat = (temp - (float)tempInt) * 10;
+
+  SendBuffer[5] += (td << 4);
+  SendBuffer[4] = tf;
+  SendBuffer[4] |= (tempFloat << 4);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setHumidity(byte hum)
-  {
-      SendBuffer[6] = (hum/10);
-      SendBuffer[6] += (hum - (SendBuffer[6] * 10)) << 4;
-  }
+{
+  SendBuffer[6] = (hum/10);
+  SendBuffer[6] += (hum - (SendBuffer[6] * 10)) << 4;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setComfort(float temp, byte hum)
+{
+  if (hum > 70)
   {
-      if (hum > 70)
-     {
-      SendBuffer[7] = 0xC0;
-      return;
-     }
-      if (hum < 40)
-     {
-      SendBuffer[7] = 0x80;
-      return;
-     }
-      if (temp > 20 && temp < 25)
-     {
-      SendBuffer[7] = 0x40;
-      return;
-     }
-     else SendBuffer[7] = 0x00;
-     return;
+    SendBuffer[7] = 0xC0;
+    return;
   }
+  if (hum < 40)
+  {
+    SendBuffer[7] = 0x80;
+    return;
+  }
+  if (temp > 20 && temp < 25)
+  {
+    SendBuffer[7] = 0x40;
+    return;
+  }
+  else SendBuffer[7] = 0x00;
+  return;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Oregon_TM::transmit()
 {
-  if (millis() >= time_marker_send && send_time) 
+  if (millis() >= time_marker_send && send_time)
   {
     SendPacket();
-    time_marker_send = millis() + send_time; 
+    time_marker_send = millis() + send_time;
     return true;
   }
   else return false;
 }
 
 
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//œÓ‰‰ÂÊÍ‡ ‰‡Ú˜ËÍ‡ THP
+//–ü–æ–¥–¥–µ—Ä–∂–∫–∞ –¥–∞—Ç—á–∏–∫–∞ THP
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 void Oregon_TM::setChannelTHP(byte channel)
-  {
+{
   SendBuffer[1] &= 0x0F;
   SendBuffer[1] += channel << 4;
-  }
-///////////////////////////////////////////////////////////////////////////////////////////////////  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setBatteryTHP( word bat_voltage)
-  {
-    SendBuffer[6] = (bat_voltage & 0x0FF0) >> 4;
-    SendBuffer[7] &= 0x0F;
-    SendBuffer[7] += (bat_voltage & 0x000F) << 4;
-   
-  }
-///////////////////////////////////////////////////////////////////////////////////////////////////  
+{
+  SendBuffer[6] = (bat_voltage & 0x0FF0) >> 4;
+  SendBuffer[7] &= 0x0F;
+  SendBuffer[7] += (bat_voltage & 0x000F) << 4;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setTemperatureTHP(float bme_temperature)
-  {
-    word temp_code;
-    if (bme_temperature < -100 || bme_temperature > 100) temp_code = 0x0FFF;
-    else temp_code = (word)((bme_temperature + 100) * 10);
-    SendBuffer[2] = temp_code & 0x00FF;
-    SendBuffer[1] &= 0xF0;
-    SendBuffer[1] += (temp_code & 0x0F00) >> 8;
-  }
-///////////////////////////////////////////////////////////////////////////////////////////////////  
+{
+  word temp_code;
+  if (bme_temperature < -100 || bme_temperature > 100) temp_code = 0x0FFF;
+  else temp_code = (word)((bme_temperature + 100) * 10);
+  SendBuffer[2] = temp_code & 0x00FF;
+  SendBuffer[1] &= 0xF0;
+  SendBuffer[1] += (temp_code & 0x0F00) >> 8;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setHumidityTHP(float bme_humidity)
-  {
-    word hum_code;
-    if (bme_humidity > 100) hum_code = 0x0FFF;
-    else hum_code = (word)(bme_humidity * 10);
-    SendBuffer[3] = (hum_code & 0x0FF0) >> 4;
-    SendBuffer[4] &= 0x0F;
-    SendBuffer[4] += (hum_code & 0x000F) << 4;
-  }
+{
+  word hum_code;
+  if (bme_humidity > 100) hum_code = 0x0FFF;
+  else hum_code = (word)(bme_humidity * 10);
+  SendBuffer[3] = (hum_code & 0x0FF0) >> 4;
+  SendBuffer[4] &= 0x0F;
+  SendBuffer[4] += (hum_code & 0x000F) << 4;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setPressureTHP(float bme_pressure)
-  {
-    word pres_code;
-    if (bme_pressure < 500) pres_code = 0x0000;
-    else pres_code = (word)((bme_pressure - 500) * 10);
-    SendBuffer[5] = pres_code & 0x00FF;
-    SendBuffer[4] &= 0xF0;
-    SendBuffer[4] += (pres_code & 0x0F00) >> 8;
-  }
+{
+  word pres_code;
+  if (bme_pressure < 500) pres_code = 0x0000;
+  else pres_code = (word)((bme_pressure - 500) * 10);
+  SendBuffer[5] = pres_code & 0x00FF;
+  SendBuffer[4] &= 0xF0;
+  SendBuffer[4] += (pres_code & 0x0F00) >> 8;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setErrorTHP()
-  {
-    SendBuffer[1] |= 0x0F;
-    SendBuffer[2] = 0xFF;
-    SendBuffer[3] = 0xFF;
-    SendBuffer[4] = 0xFF;
-    SendBuffer[5] = 0xFF;
-  }
+{
+  SendBuffer[1] |= 0x0F;
+  SendBuffer[2] = 0xFF;
+  SendBuffer[3] = 0xFF;
+  SendBuffer[4] = 0xFF;
+  SendBuffer[5] = 0xFF;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::calculateAndSetChecksumTHP()
 {
@@ -711,7 +695,7 @@ void Oregon_TM::calculateAndSetChecksumTHP()
   byte summ = 0x00;
   byte crc = 0x00;
   byte cur_nible;
-  for(int i = 0; i<8; i++) 
+  for(int i = 0; i<8; i++)
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
@@ -719,7 +703,7 @@ void Oregon_TM::calculateAndSetChecksumTHP()
     for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-      
+
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
     crc ^= cur_nible;
@@ -732,4 +716,3 @@ void Oregon_TM::calculateAndSetChecksumTHP()
   SendBuffer[8] += crc & 0x0F;
   SendBuffer[9] += crc & 0xF0;
 }
-
