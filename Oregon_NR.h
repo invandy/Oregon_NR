@@ -20,7 +20,7 @@
 // UVN800,
 // PCR800.
 //
-// Aslo supported self-developed sensors. Please contact author for additional infromation.
+// Also supported self-developed sensors. Please contact author for additional information.
 //
 // This file is part of the Arduino OREGON_NR library.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
