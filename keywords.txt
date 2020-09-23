@@ -1,4 +1,3 @@
-
 Oregon_NR	KEYWORD1
 
 start	KEYWORD2
@@ -35,6 +34,8 @@ RTGN318		LITERAL1
 THGR810		LITERAL1
 WGR800		LITERAL1
 UVN800		LITERAL1
+PCR800		LITERAL1
+THN800		LITERAL1
 
 Oregon_TM	KEYWORD1
 
@@ -50,4 +51,4 @@ setComfort	KEYWORD3
 transmit	KEYWORD3
 SendPacket	KEYWORD3
 timing_correction KEYWORD3
-decode_method   KEYWORD3
+decode_method   KEYWORD3 
