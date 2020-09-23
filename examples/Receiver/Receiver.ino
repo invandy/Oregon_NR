@@ -87,7 +87,6 @@ void loop() {
 
   if (oregon.sens_type == WGR800 && oregon.crc_c){
       Serial.print("\t");
-      float wnddata;
       Serial.print(" TYPE: ");
       Serial.print("WGR800");
       Serial.print(" AVG WS: ");
@@ -104,11 +103,24 @@ void loop() {
 
     if (oregon.sens_type == UVN800 && oregon.crc_c){
       Serial.print("\t");
-      float wnddata;
       Serial.print(" TYPE: ");
       Serial.print("UVN800");
       Serial.print(" UV IDX: ");
       Serial.print(oregon.UV_index);
+      Serial.print(" BAT: ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      Serial.print("ID: ");
+      Serial.print(oregon.sens_id, HEX);
+    }    
+
+    if (oregon.sens_type == PCR800 && oregon.crc_c){
+      Serial.print("\t");
+      Serial.print(" TYPE: ");
+      Serial.print("PCR800");
+      Serial.print(" TOTAL: ");
+      Serial.print(oregon.get_total_rain(), 1);
+      Serial.print(" AVERAGE: ");
+      Serial.print(oregon.get_rain_rate(), 1);
       Serial.print(" BAT: ");
       if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
       Serial.print("ID: ");
