@@ -468,7 +468,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 ////////////////////////////////////////////////////////////////////////////////////////////////////    
 //Расшифровка датчиков Орегон
 ////////////////////////////////////////////////////////////////////////////////////////////////////    
-    if ((sens_type == THGN132 || sens_type == THN132 || sens_type == THN800 || (sens_type  & 0x0FFF)== RTGN318 || sens_type == THGR810) && crc_c){
+      if ((sens_type == THGN132 || sens_type == THN132 || sens_type == THN800 || (sens_type  & 0x0FFF)== RTGN318 || sens_type == THGR810) && crc_c){
 
       sens_id = get_id(packet);
       sens_chnl = get_channel(packet);
@@ -492,7 +492,13 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       sens_battery = get_battery(packet);
       UV_index = get_UV(packet);
       lightness = get_light(packet);
-}
+    }
+    
+    if (sens_type == PCR800 && crc_c){
+      sens_id = get_id(packet);
+      sens_battery = get_battery(packet);
+      // Остальные параметры извлекаюся непосредственно из пакета
+    }   
 
 
 
@@ -1243,7 +1249,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
   {
     byte channel = 0;  
 //    word sens_type = get_sensor(oregon_data);
-    if (sens_type == THGN132 || sens_type == THN132 || sens_type == THN800)
+    if (sens_type == THGN132 || sens_type == THN132)
     {
       switch (*(oregon_data + 4))  
       {  
@@ -1258,7 +1264,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
         break;  
       }  
     }
-    if ((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 )
+    if ((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810  || sens_type == THN800)
         channel = *(oregon_data + 4);  
     return channel;  
   }
@@ -1267,7 +1273,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_battery(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == PCR800 ||  sens_type == UVN800) && crc_c)
   return (*(oregon_data+7) & 0x4) ? 0 : 1;  
   else  return 0;
 }
@@ -1293,7 +1299,7 @@ float Oregon_NR::get_humidity(byte* oregon_data){
 //oregon_data - указатель на кодовую посылку
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_id(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800 ||  sens_type == PCR800) && crc_c)
   {
     byte tmprt;
     oregon_data += 5;
@@ -1378,8 +1384,40 @@ byte Oregon_NR::get_light(byte* oregon_data)
   }
   else return 0;
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Возвращает данные с датчика дождя
+//oregon_data - указатель на кодовую посылку
+////////////////////////////////////////////////////////////////////////////////////////////////////
+float Oregon_NR::get_total_rain()
+{
+  if (sens_type == PCR800 && crc_c){
+    float tmprt;
+    tmprt = *(packet + 17) * 100000;
+    tmprt += *(packet + 16) * 10000;
+    tmprt += *(packet + 15) * 1000;
+    tmprt += *(packet + 14) * 100;
+    tmprt += *(packet + 13) * 10;
+    tmprt += *(packet + 12);
+    tmprt *= 25;
+    return tmprt / 1000;
+  }
+  else return 0;
+}
 
-
+float Oregon_NR::get_rain_rate()
+{
+  if (sens_type == PCR800 && crc_c){
+    float tmprt; 
+    tmprt = *(packet + 7) * 10000;
+    tmprt += *(packet + 8) * 1000;
+    tmprt += *(packet + 9) * 100;
+    tmprt += *(packet + 10) * 10;
+    tmprt += *(packet + 11);
+    tmprt *= 25;
+    return tmprt / 1000;
+  }
+  else return 0;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Проверка CRC
 //oregon_data - указатель на кодовую посылку
@@ -1498,6 +1536,17 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
     }
 
     resived_crc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
+    return (resived_crc == crc)? 1 : 0;
+  }
+
+  if (sens_type == PCR800){
+   //CHKSUM 1...18
+    for(int x=0; x < 18; x++){
+      crc += *pp;
+      pp++;
+    }
+
+    resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
     return (resived_crc == crc)? 1 : 0;
   }
 
