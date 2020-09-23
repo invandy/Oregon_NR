@@ -50,6 +50,7 @@
 #define THN800	  0xC844 // Температура,  3 канала,
 #define WGR800	  0x1984 // Направление и скорость ветра
 #define UVN800	  0xD874 // УФ-индекс, освещённость (спасибо XOR за предоставленные данные)
+#define PCR800	  0x2914 // счётчик осадков
 
 //
 // Датчики собственной разработки:
@@ -145,6 +146,9 @@ class Oregon_NR
     byte UV_index, lightness;
     byte get_UV(byte*);
     byte get_light(byte*);
+    //счётчик осадков
+    float get_total_rain();
+    float get_rain_rate();
 
     byte restore_sign;            //Битовое поле, инормирующее об успешных способах реставрации пакета
 
@@ -253,4 +257,3 @@ class Oregon_NR
 };
 
 #endif
-
