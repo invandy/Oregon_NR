@@ -57,13 +57,14 @@ void loop() {
     Serial.print(oregon.work_time);
     Serial.print("ms ");
     
-    if ((oregon.sens_type == THGN132 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGR810 || oregon.sens_type == THN132) && oregon.crc_c){
+    if ((oregon.sens_type == THGN132 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGR810 || oregon.sens_type == THN132 || oregon.sens_type == THN800) && oregon.crc_c){
       Serial.print("\t");
       Serial.print(" TYPE: ");
       if (oregon.sens_type == THGN132) Serial.print("THGN132N");
       if (oregon.sens_type == THGR810) Serial.print("THGR810 ");
       if ((oregon.sens_type & 0x0FFF) == RTGN318) Serial.print("RTGN318");
-      if (oregon.sens_type == THN132) Serial.print("THN132N ");
+      if (oregon.sens_type == THN132 || ) Serial.print("THN132N ");
+      if (oregon.sens_type == THN800 || ) Serial.print("THN800");
       Serial.print(" CHNL: ");
       Serial.print(oregon.sens_chnl);
       if (oregon.sens_tmp >= 0 && oregon.sens_tmp < 10) Serial.print(" TMP:  ");
