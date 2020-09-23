@@ -46,6 +46,7 @@
 
 #define THGN132   0x1D20 
 #define THGR810   0xF824
+#define THТ800    0xС844
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
 
