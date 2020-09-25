@@ -50,14 +50,17 @@
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
 
+#define OREGON_SEND_BUFFER_SIZE 30
+
 static byte TX_PIN = 4;
-static const int buffersize = 10;
+
 
 class Oregon_TM
 {
   public:
 
-    byte SendBuffer[buffersize];
+    int buffer_size = 19;
+    byte SendBuffer[OREGON_SEND_BUFFER_SIZE];
     byte protocol = 2;
     word sens_type = 0x0000;               
     int timing_corrector2 = 4;
