@@ -1,15 +1,10 @@
 #include <Oregon_NR.h>
-//#include <Oregon_TR.h>
 
-#define UNO
-
-#ifdef UNO
-//Oregon_NR oregon(2, 0, 13); // Для Arduino UNO/Nano - приёмник на выводе D2, Прерывание 0, Светодиод приёма на вывод 13
-Oregon_NR oregon(2, 0); // Если светодиод не нужен
-#endif
-
-#ifdef WEMOS_D1
-Oregon_NR oregon(13, 13, 2, true); // для Wemos D1 - датчик на выводе D7 (GPIO13), Светодиод на D2 подтянут к +пит.
+#if defined ( ESP8266 ) || ( ESP32 )
+  Oregon_NR oregon(13, 13, 2, true); // приёмник на выводе D7 (GPIO13), Светодиод на D2 подтянут к +пит.
+#else
+  Oregon_NR oregon(2, 0, 13, false); // приёмник на выводе D2, Прерывание 0, Светодиод приёма на вывод 13
+//Oregon_NR oregon(2, 0); 	    // Если светодиод не нужен
 #endif
 
 void setup() {
@@ -46,11 +41,13 @@ void loop() {
     else  Serial.print(" ");
     if (oregon.restore_sign & 0x04) Serial.print("p "); //исправленна ошибка при распознавании версии пакета
     else  Serial.print("  ");
+    if (oregon.restore_sign & 0x08) Serial.print("r "); //собран из двух кусков пакетов (при IS_ASSEMBLE == 1)
+    else  Serial.print("  ");
 
     //Вывод полученного пакета. Точки - это ниблы, содержащие сомнительные биты
-    for (int q = 0;q < PACKET_LENGTH - 1; q++)
+    for (int q = 0;q < PACKET_LENGTH; q++)
       if (oregon.valid_p[q] == 0x0F) Serial.print(oregon.packet[q], HEX);
-      else Serial.print(".");
+      else Serial.print(" ");
         
     //Время обработки пакета
     Serial.print("  ");
