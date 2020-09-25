@@ -192,15 +192,19 @@ void Oregon_TM::sendLSB(byte data)
 
 void Oregon_TM::sendData()
 {
-  for(byte i = 0; i < 10; ++i)
-  {
-    sendMSB(SendBuffer[i]);
-    if (i < 9)
-    sendLSB(SendBuffer[i]);
-  if (protocol == 2) time_marker += 4;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
-  //if (protocol == 3) time_marker += 4;
-    //Поправка на разницу тактовых частот 1024.07Гц и 1024Гц
-  }
+   int q = 0;
+   for(byte i = 0; i < OREGON_SEND_BUFFER_SIZE; ++i)
+   {
+     if (q >= buffer_size) break;
+     q++;
+     sendMSB(SendBuffer[i]);
+     if (q >= buffer_size) break;
+     q++;
+     sendLSB(SendBuffer[i]);
+     if (protocol == 2) time_marker += 4;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
+   //if (protocol == 3) time_marker += 4;
+     //Поправка на разницу тактовых частот 1024.07Гц и 1024Гц
+   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
  
