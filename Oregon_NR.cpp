@@ -360,7 +360,11 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       //////////////////////////////////////////////
       //СОПОСТАВЛЕНИЕ ПАКЕТОВ
       //Если пакет один, то и сопоставлять не из чего
-       if (packet_number == 1) result_data = collect_data;     
+       if (packet_number == 1)
+	{
+	  result_size = read_tacts;
+	  result_data = collect_data;     
+        }
        //////////////////////////////////////////////
        //А вот если два, то нужна СБОРКА ПАКЕТА
        //вычисляем оптимальное "смещение" пакетов друг относительно друга
@@ -414,8 +418,9 @@ void Oregon_NR::capture(bool DEBUG_INFO)
      //Проверяем, дало ли что-нибудь сращивание - отключил. Это даёт всего лишь флаг, но занимает много времени
     //////////////////////////////////////////////
 
- //   if (get_data(halfshift, ver, result_data) > data_val && get_data(halfshift, ver, result_data) > data_val2 && ver == 2)
-//	restore_sign ^= 8;
+   //if (get_data(halfshift, ver, result_data) > data_val && get_data(halfshift, ver, result_data) > data_val2 && ver == 2)
+   if (packet_number == 2)
+	restore_sign ^= 8;
 
     //////////////////////////////////////////////
     //Извлекаем из тактовой последовательности биты
@@ -429,7 +434,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       byte secresingV;
       if (sens_type == THGN132 || (sens_type & 0xFF00) == GAS) secresingV = PACKET_LENGTH - 4;
       if (sens_type == THN132 || sens_type == THN800) secresingV = PACKET_LENGTH - 6;
-      for (byte www = 0; www < (PACKET_LENGTH - secresingV + 2); www++)
+      for (int www = 0; www < (PACKET_LENGTH - secresingV + 2); www++)
       if (valid_p[www] < 0x0f) crc_c = false;
       //Захват пакета происходит тольок в случае, если найдена стартовая последовательность (нибл синхронизации)
       //Если не было синхрониблов - то не о чем вообще разговаривать
@@ -846,6 +851,7 @@ int Oregon_NR::get_data(int btt, byte p_ver, byte* cdptr){ //btt - смещен�
       if (*cdp>(129))  packet_validity += *cdp - 128;
       if (*cdp<(127)) packet_validity += 128 - *cdp;
       cdp++;
+      yield();
     }
   return packet_validity; //возвращаем кол-во достоверных байтов
   }
@@ -923,6 +929,7 @@ int Oregon_NR::get_data(int btt, byte p_ver, byte* cdptr){ //btt - смещен�
       if (*cdp>(129))  packet_validity += *cdp - 128;
       if (*cdp<(127)) packet_validity += 128 - *cdp;
       cdp++;
+      yield();
     }
   return packet_validity; //возвращаем кол-во достоверных байтов
   }
@@ -963,9 +970,9 @@ int Oregon_NR::collect(byte* cdptr){
   //////////////////////////////////////////////////////
   //Начинаем читать данные в память
   // Максимальная длина поасылка для v3 - 104БИТА, THN132 - 76 бИТ + как минимум 3 бита 111, которые мы уже нашли
-  byte bt;
+  int bt;
 
-  for (bt = 0 ; bt < READ_BITS2; bt++) {        
+  for (bt = 0 ; bt < READ_TACTS; bt++) {        
     *cdp = 0;
     for (byte ckl = 0; ckl < 8; ckl++) {            // Читаем 8 раз за полутакт
       pre_marker += 61;
@@ -1037,11 +1044,11 @@ int Oregon_NR::correlate_data(byte* ser1, byte* ser2){
   byte* s2;
   byte* s2t = ser2;
   //смещаем первый пакет относительно второго
-  for (byte sht = 0; sht < READ_BITS; sht++){
+  for (int sht = 0; sht < READ_BITS; sht++){
     s1 = ser1;
     s2 = s2t;
     shift_score[sht] = 0;
-    for(byte sp = 0; sp < READ_BITS - sht; sp++){
+    for(int sp = 0; sp < READ_BITS - sht; sp++){
       if ((*s1 > (128+1) && *s2 > (128+1))||(*s1 < (128-1) && *s2 < (128-1)) ) shift_score[sht]++;
       s2++;
       s1++;
@@ -1060,7 +1067,7 @@ int Oregon_NR::correlate_data(byte* ser1, byte* ser2){
 //Теперь наоборот -втрой пакет относительно первого
   
   byte* s1t = ser1;
-  for (byte sht = 0; sht < READ_BITS; sht++){
+  for (int sht = 0; sht < READ_BITS; sht++){
     s2 = ser2;
     s1 = s1t;
     shift_score[sht] = 0;
@@ -1186,7 +1193,8 @@ int Oregon_NR::get_info_data(byte* code, byte* result, byte* valid){
   for (int i = 0; i < READ_BITS - csm; i++) 
   {
     // Чтобы не выйти за пределы
-    if (i >= PACKET_LENGTH * 4) break;
+    if (i >= PACKET_LENGTH * 4 || (ver == 2 && i > result_size / 2 - csm - 4) || (ver == 3 && i > result_size - csm - 4)) break;
+
     byte multipl;
     switch (ii){
       case 0: {multipl = 0x01; break;}
@@ -1208,6 +1216,11 @@ int Oregon_NR::get_info_data(byte* code, byte* result, byte* valid){
       rd++;
     }
   }
+//	Serial.println();
+//	Serial.println(result_size);
+//	Serial.println(csm);
+//	Serial.println((result_size/2 - csm - 4) / 4);
+
   return 1;
 }
 //
@@ -1273,7 +1286,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_battery(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == PCR800 ||  sens_type == UVN800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132  || sens_type == THN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == PCR800 ||  sens_type == UVN800) && crc_c)
   return (*(oregon_data+7) & 0x4) ? 0 : 1;  
   else  return 0;
 }
@@ -1299,7 +1312,7 @@ float Oregon_NR::get_humidity(byte* oregon_data){
 //oregon_data - указатель на кодовую посылку
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_id(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN800 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800 ||  sens_type == PCR800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800 ||  sens_type == PCR800) && crc_c)
   {
     byte tmprt;
     oregon_data += 5;
@@ -1456,8 +1469,8 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
   if ((sens_type & 0x0FFF) == RTGN318){
  //CHKSUM 1...15 
  //CRC 1...5,8...15 STARTSUM = 00h, POLY = 07h
-    truecrc = 0x0;
-    for(int x=0; x<15; x++){
+    truecrc = 0x00;
+    for(int x=0; x < 15; x++){
       crc += *pp;
       if ( x != 5 && x != 6){
         truecrc ^= *pp;
@@ -1529,15 +1542,31 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
 
   if (sens_type == WGR800){
-   //CHKSUM 1...17
-    for(int x=0; x < 17; x++){ 
+ //CHKSUM 1...17 
+ //CRC 1...5,8...17 STARTSUM = B3h, POLY = 07h
+    truecrc = 0xB3;
+    for(int x=0; x < 17; x++){
       crc += *pp;
+      if ( x != 5 && x != 6){
+        truecrc ^= *pp;
+        for(i = 0; i<4; i++) 
+          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
+          else truecrc <<= 1;
+      }
       pp++;  
     }
+    for(i = 0; i<4; i++) 
+      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
+      else truecrc <<= 1;
 
     resived_crc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    return (resived_crc == crc)? 1 : 0;
+    resived_truecrc = (*(oregon_data+19))+(*(oregon_data+20))*0x10;
+    received_CRC = truecrc;
+    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
   }
+
+
+
 
   if (sens_type == PCR800){
    //CHKSUM 1...18
