@@ -1565,15 +1565,31 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
     return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
   }
 
-
-
-
   if (sens_type == PCR800){
-   //CHKSUM 1...18
+ //CHKSUM 1...18 
+ //CRC 1...5,8...18 STARTSUM = 73h, POLY = 07h
+    truecrc = 0x73;
     for(int x=0; x < 18; x++){
       crc += *pp;
-      pp++;
+      if ( x != 5 && x != 6){
+        truecrc ^= *pp;
+        for(i = 0; i<4; i++) 
+          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
+          else truecrc <<= 1;
+      }
+      pp++;  
     }
+    for(i = 0; i<4; i++) 
+      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
+      else truecrc <<= 1;
+
+    resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
+    resived_truecrc = (*(oregon_data+20))+(*(oregon_data+21))*0x10;
+    received_CRC = truecrc;
+    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  }
+
+
 
     resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
     return (resived_crc == crc)? 1 : 0;
