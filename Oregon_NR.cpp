@@ -1591,10 +1591,6 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
 
 
-    resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
-    return (resived_crc == crc)? 1 : 0;
-  }
-
   if (sens_type==THN132){
 
  //CHKSUM 1...12 
