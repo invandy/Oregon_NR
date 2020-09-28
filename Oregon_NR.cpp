@@ -1569,7 +1569,7 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
 
   if (sens_type == PCR800){
-    //CHKSUM 1...18 
+ //CHKSUM 1...18 
  //CRC 1...5,8...18 STARTSUM = 73h, POLY = 07h
     truecrc = 0x73;
     for(int x=0; x < 18; x++){
@@ -1586,8 +1586,8 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
       if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
       else truecrc <<= 1;
 
-    resived_crc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    resived_truecrc = (*(oregon_data+19))+(*(oregon_data+20))*0x10;
+    resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
+    resived_truecrc = (*(oregon_data+20))+(*(oregon_data+21))*0x10;
     received_CRC = truecrc;
     return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
   }
