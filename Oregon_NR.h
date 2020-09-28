@@ -194,7 +194,7 @@ class Oregon_NR
     unsigned long sens_drop_counter;// счётчик капель (for CAPRAIN sensor)
     int sens_capacitance;         //Емкость сенсора (for CAPRAIN sensor)
 #endif                                  
-
+    bool check_oregon_crcsum(byte*, byte , byte , byte );
 
   private:
 
@@ -242,6 +242,7 @@ class Oregon_NR
     byte get_gas_channel(byte* gas_data);
     void restore_data(byte* oregon_data, word sensor_type);
     bool check_CRC(byte* oregon_data, word sensor_type);
+    bool check_own_crcsum(byte* , byte);
     byte get_id(byte* oregon_data);
     float get_humidity(byte* oregon_data);
     byte get_battery(byte* oregon_data);
