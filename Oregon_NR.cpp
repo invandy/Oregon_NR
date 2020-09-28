@@ -1437,237 +1437,119 @@ float Oregon_NR::get_rain_rate()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
-  byte* pp=oregon_data;
-  byte crc, resived_crc, truecrc, resived_truecrc, i;
-  crc=0;
-  byte CCIT_POLY = 0x07;
-  
-  if (sens_type==THGN132){
- //CHKSUM 1...15 
- //CRC 1...5,8...15 STARTSUM = 3Ch, POLY = 07h
-    truecrc = 0x3C;
-    for(int x=0; x < 15; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+15))+(*(oregon_data+16))*0x10;
-    resived_truecrc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type==THGN132)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X3C, 19) ;
   }
 
-  if ((sens_type & 0x0FFF) == RTGN318){
- //CHKSUM 1...15 
- //CRC 1...5,8...15 STARTSUM = 00h, POLY = 07h
-    truecrc = 0x00;
-    for(int x=0; x < 15; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+15))+(*(oregon_data+16))*0x10;
-    resived_truecrc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if ((sens_type & 0x0FFF) == RTGN318)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19) ;
   }
 
-  if (sens_type == THGR810){
- //CHKSUM 1...15 
- //CRC 00h,1...15 STARTSUM = 00h, POLY = 07h
-    truecrc = 0x0;
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-    for(int x=0; x<15; x++){
-      crc += *pp;
-      truecrc ^= *pp;
-      for(i = 0; i<4; i++) 
-        if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-        else truecrc <<= 1;
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+15))+(*(oregon_data+16))*0x10;
-    resived_truecrc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type == THGR810)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X0B, 19) ;
   }
 
-  if (sens_type == UVN800 ){
- //CHKSUM 1...13 
- //CRC 00h,1...13 STARTSUM = 00h, POLY = 07h
-    truecrc = 0x0;
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-    for(int x=0; x<13; x++){
-      crc += *pp;
-      truecrc ^= *pp;
-      for(i = 0; i<4; i++) 
-        if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-        else truecrc <<= 1;
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+13))+(*(oregon_data+14))*0x10;
-    resived_truecrc = (*(oregon_data+15))+(*(oregon_data+16))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type == UVN800 )
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0XD4, 17) ;
   }
 
 
-  if (sens_type == WGR800){
- //CHKSUM 1...17 
- //CRC 1...5,8...17 STARTSUM = B3h, POLY = 07h
-    truecrc = 0xB3;
-    for(int x=0; x < 17; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    resived_truecrc = (*(oregon_data+19))+(*(oregon_data+20))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type == WGR800)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0XB3, 21) ;
   }
 
 
-
-
-  if (sens_type == PCR800){
- //CHKSUM 1...18 
- //CRC 1...5,8...18 STARTSUM = 73h, POLY = 07h
-    truecrc = 0x73;
-    for(int x=0; x < 18; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
-    resived_truecrc = (*(oregon_data+20))+(*(oregon_data+21))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type == PCR800)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X73, 22) ;
   }
 
-  if (sens_type==THN132){
-
- //CHKSUM 1...12 
- //CRC 1...5,8...12 STARTSUM = D6h, POLY = 07h
-    truecrc = 0xD6;
-    for(int x=0; x<12; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+12))+(*(oregon_data+13))*0x10;
-    resived_truecrc = (*(oregon_data+14))+(*(oregon_data+15))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type==THN132)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0XD6, 16) ; 
   }
 
-  if (sens_type==THN800){
-
- //CHKSUM 1...12 
- //CRC 1...5,8...12 STARTSUM = 88h, POLY = 07h
-    truecrc = 0x88;
-    for(int x=0; x<12; x++){
-      crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+12))+(*(oregon_data+13))*0x10;
-    resived_truecrc = (*(oregon_data+14))+(*(oregon_data+15))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+  if (sens_type==THN800)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X88, 16) ; 
   }
 
 #ifdef ADD_SENS_SUPPORT == 1
 
-  if ((sens_type & 0xFF00) == GAS || (sens_type & 0xFF00) == THP || (sens_type & 0xFF00) == FIRE || (sens_type & 0xFF00) == CURRENT  || (sens_type & 0xFF00) == CAPRAIN){
-    truecrc = 0x00;
-    for(int x=0; x<15; x++){
-      crc += *pp;
-      truecrc ^= *pp;
-      for(i = 0; i<4; i++) 
-        if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-        else truecrc <<= 1;
-      pp++;  
-    }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
-
-    resived_crc = (*(oregon_data+15))+(*(oregon_data+16))*0x10;
-    resived_truecrc = (*(oregon_data+17))+(*(oregon_data+18))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
-
+  if ((sens_type & 0xFF00) == GAS || (sens_type & 0xFF00) == THP || (sens_type & 0xFF00) == FIRE || (sens_type & 0xFF00) == CURRENT  || (sens_type & 0xFF00) == CAPRAIN)
+  {
+    return check_own_crcsum(oregon_data, 19) ; 
   }
 #endif
 
   return 0;
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Процедура расчёта CRC8 И контрольной суммы для датчиков Oregon
+// oregon_data - указатель на кодовую посылку
+// CCIT_POLY - образующий полином CRC
+// CCIT_START - начальное значение CRC
+// p_length - длина пакета 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+bool Oregon_NR::check_oregon_crcsum(byte* oregon_data, byte CCIT_POLY, byte CCIT_START, byte p_length)
+
+{
+  byte* pp = oregon_data;
+  byte cksum = 0, crc = CCIT_START,  recived_cksum, recived_crc;
+  for(int x=0; x < p_length - 4; x++)
+  {
+    cksum += *pp;
+    if ( x != 5 && x != 6)
+    {
+      crc ^= *pp;
+      for(byte i = 0; i < 4; i++) 
+        if(crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+        else crc <<= 1;
+    }
+    pp++;  
+  }
+  for(byte i = 0; i < 4; i++) 
+    if(crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+    else crc <<= 1;
+  recived_cksum = *pp + *(pp + 1)*0x10;
+  recived_crc = *(pp + 2) + *(pp + 3)*0x10;
+  return (recived_crc == crc && recived_cksum == cksum)? 1 : 0;  
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Процедура расчёта CRC8 И контрольной суммы для датчиков Oregon
+// oregon_data - указатель на кодовую посылку
+// CCIT_POLY - образующий полином CRC
+// CCIT_START - начальное значение CRC
+// p_length - длина пакета 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+bool Oregon_NR::check_own_crcsum(byte* oregon_data, byte p_length)
+
+{
+  byte* pp = oregon_data;
+  byte cksum = 0, crc = 0,  recived_cksum, recived_crc;
+  for(int x=0; x < p_length - 4; x++)
+  {
+    cksum += *pp;
+    crc ^= *pp;
+    for(byte i = 0; i < 4; i++) 
+      if(crc & 0x80) crc = (crc << 1) ^ 7;
+      else crc <<= 1;
+    pp++;  
+  }
+  for(byte i = 0; i < 4; i++) 
+    if(crc & 0x80) crc = (crc << 1) ^ 7;
+    else crc <<= 1;
+  recived_cksum = *pp + *(pp + 1)*0x10;
+  recived_crc = *(pp + 2) + *(pp + 3)*0x10;
+  return (recived_crc == crc && recived_cksum == cksum)? 1 : 0;  
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Востановление данных по типу датчика
 ////////////////////////////////////////////////////////////////////////////////////////////////////
