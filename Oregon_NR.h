@@ -80,12 +80,12 @@
                                 // Больше - можно не поймать пакет в условиях сильных шумов
                                 // Меньше - можно пропустить пакет, сильно отвлекаясь на анализ шумов
 
-#define PACKET_LENGTH 22       // Длина пакета в ниблах без учёта преамбулы и синхронибла,
-                		// максимальная у PCR800 - 22 нибла
-                                //ДЛя захвата более длинных пакетов можно увеличить до 64
+#define PACKET_LENGTH 24        // Длина пакета в ниблах без учёта преамбулы и синхронибла,
+                 		// максимальная у PCR800 - 22 нибла
+                                //ДЛя захвата более длинных пакетов можно увеличить 
 
 
-#define READ_BITS ((PACKET_LENGTH + 7) * 4)	
+#define READ_BITS ((PACKET_LENGTH + 8) * 4)	
 
                          	// Максимальная длина пакета в битах
                                 // преамбула для v2 - 5 ниблов(FFFFA), самый длинный пакет - 19ниблов (THGN132)
@@ -93,7 +93,7 @@
                                 //преамбула для v3 - 7 ниблов(FFFFFFA), самый длинный пакет - 22нибла PCR900
 				//итого (22 + 7) * 4 = 116 бит
 
-#define READ_TACTS ((PACKET_LENGTH + 5) * 8)
+#define READ_TACTS ((PACKET_LENGTH + 6) * 8)
                 		// Максимальная длина пакета в такта
                                 // v2 - 96 * 2 = 192
                                 // v3 - 116 = 116
@@ -207,16 +207,16 @@ class Oregon_NR
     //bool  reciever_ctrl = true; //Флаг контроля ресивера (выставляется при приходе импулься, сбрасывается в таймере)
 
     //Массивы данных для записи данных с канала и полученных битов
-    byte decode_tacts[READ_BITS * 2]; //Массив тактов. значения
+    byte decode_tacts[READ_TACTS]; //Массив тактов. значения
     //                          0=ноль
     //                          1=единица
     //                          2=неизвестен
     //                          3=переход+
     //                          4=переход-
 
-    byte collect_data[READ_BITS * 2], //Память для сбора данных с приёмника
+    byte collect_data[READ_TACTS], //Память для сбора данных с приёмника
 #if IS_ASSEMBLE
-    collect_data2[READ_BITS * 2];
+    collect_data2[READ_TACTS];
 #else
     collect_data2[1];
 #endif
@@ -253,7 +253,7 @@ class Oregon_NR
     int correlate_data(byte* ser1, byte* ser2);
     int collect(byte* cdptr);
     int get_data(int btt, byte p_ver, byte* cdptr);
-    void get_tacts(byte*, byte);
+    void get_tacts(byte*, int);
     int get_synchro_pos(byte* code);
     void led_light(bool);
 
