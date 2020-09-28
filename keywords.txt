@@ -51,4 +51,5 @@ setComfort	KEYWORD3
 transmit	KEYWORD3
 SendPacket	KEYWORD3
 timing_correction KEYWORD3
-decode_method   KEYWORD3 
+decode_method   KEYWORD3
+check_oregon_crcsum KEYWORD3
