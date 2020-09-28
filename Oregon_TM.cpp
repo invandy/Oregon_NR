@@ -322,7 +322,7 @@ void Oregon_TM::calculateAndSetChecksum810()
   SendBuffer[8] = 0x00;
   SendBuffer[9] = 0x00;
   byte summ = 0x00;
-  byte crc = 0x00;
+  byte crc = 0x0B;
   byte cur_nible;
   for(int j = 0; j < 4; j++)
   if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
