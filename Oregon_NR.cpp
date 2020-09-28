@@ -594,7 +594,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 //Параметры: cdptr - указатель на записанную тактовую последовательность
 //Результат пишется в массив decode_tacts
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void Oregon_NR::get_tacts(byte* cdptr, byte bitsize){
+void Oregon_NR::get_tacts(byte* cdptr, int bitsize){
   
 //Сброс массивов
   for(int bt = 0 ; bt < bitsize; bt++) decode_tacts[bt] = 2;      //Изначально такт неизвестен
@@ -949,7 +949,7 @@ int Oregon_NR::collect(byte* cdptr){
   bool cdp_prev_null;
   byte* cdp = cdptr;
   byte nulls_found = 0;
-  byte bt2 = 0;
+  int bt2 = 0;
   //////////////////////////////////////////////////////
   //Запись начинаем с этого момента (конец последнего импулься зацепки + 1/16 такта)
   if (ver == 2) 
@@ -1071,7 +1071,7 @@ int Oregon_NR::correlate_data(byte* ser1, byte* ser2){
     s2 = ser2;
     s1 = s1t;
     shift_score[sht] = 0;
-    for (byte sp = 0; sp < READ_BITS-sht; sp++){
+    for (int sp = 0; sp < READ_BITS-sht; sp++){
       
       if ((*s1 > (128+1) && *s2 > (128+1))||(*s1 < (128-1) && *s2 < (128-1)) ) shift_score[sht]++;
       s2++;
@@ -1195,7 +1195,7 @@ int Oregon_NR::get_info_data(byte* code, byte* result, byte* valid){
     // Чтобы не выйти за пределы
     if (i >= PACKET_LENGTH * 4 || (ver == 2 && i > result_size / 2 - csm - 4) || (ver == 3 && i > result_size - csm - 4)) break;
 
-    byte multipl;
+    int multipl;
     switch (ii){
       case 0: {multipl = 0x01; break;}
       case 1: {multipl = 0x02; break;}
@@ -1565,31 +1565,19 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
     return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
   }
 
+
+
+
   if (sens_type == PCR800){
- //CHKSUM 1...18 
- //CRC 1...5,8...18 STARTSUM = 73h, POLY = 07h
-    truecrc = 0x73;
+   //CHKSUM 1...18
     for(int x=0; x < 18; x++){
       crc += *pp;
-      if ( x != 5 && x != 6){
-        truecrc ^= *pp;
-        for(i = 0; i<4; i++) 
-          if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-          else truecrc <<= 1;
-      }
-      pp++;  
+      pp++;
     }
-    for(i = 0; i<4; i++) 
-      if(truecrc & 0x80) truecrc = (truecrc << 1) ^ CCIT_POLY;
-      else truecrc <<= 1;
 
     resived_crc = (*(oregon_data+18))+(*(oregon_data+19))*0x10;
-    resived_truecrc = (*(oregon_data+20))+(*(oregon_data+21))*0x10;
-    received_CRC = truecrc;
-    return (resived_crc == crc && resived_truecrc == truecrc)? 1 : 0;
+    return (resived_crc == crc)? 1 : 0;
   }
-
-
 
   if (sens_type==THN132){
 
