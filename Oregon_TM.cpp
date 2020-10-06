@@ -42,8 +42,20 @@
 
 
 //Конструктор
+
+Oregon_TM::Oregon_TM(byte tr_pin, int buf_size)
+{
+  max_buffer_size = (int)(buf_size / 2) + 1;
+  SendBuffer = new byte[max_buffer_size];
+  TX_PIN = tr_pin;
+  pinMode(TX_PIN, OUTPUT); 
+  digitalWrite(TX_PIN, LOW);
+
+}
+
 Oregon_TM::Oregon_TM(byte tr_pin)
 {
+  SendBuffer = new byte[max_buffer_size];
   TX_PIN = tr_pin;
   pinMode(TX_PIN, OUTPUT); 
   digitalWrite(TX_PIN, LOW);
@@ -52,6 +64,7 @@ Oregon_TM::Oregon_TM(byte tr_pin)
 
 Oregon_TM::Oregon_TM(void)
 {
+  SendBuffer = new byte[max_buffer_size];
   pinMode(TX_PIN, OUTPUT); 
   digitalWrite(TX_PIN, LOW);
 }
@@ -193,14 +206,14 @@ void Oregon_TM::sendLSB(byte data)
 void Oregon_TM::sendData()
 {
    int q = 0;
-   for(byte i = 0; i < OREGON_SEND_BUFFER_SIZE; ++i)
+   for(byte i = 0; i < max_buffer_size; i++)
    {
-     if (q >= buffer_size) break;
-     q++;
      sendMSB(SendBuffer[i]);
-     if (q >= buffer_size) break;
      q++;
+     if (q >= buffer_size) break;
      sendLSB(SendBuffer[i]);
+     q++;
+     if (q >= buffer_size) break;
      if (protocol == 2) time_marker += 4;       //Поправка на разницу тактовых частот 1024.07Гц и 1024.60Гц
    //if (protocol == 3) time_marker += 4;
      //Поправка на разницу тактовых частот 1024.07Гц и 1024Гц
@@ -322,30 +335,28 @@ void Oregon_TM::calculateAndSetChecksum810()
   SendBuffer[8] = 0x00;
   SendBuffer[9] = 0x00;
   byte summ = 0x00;
-  byte crc = 0x0B;
+  byte crc = 0x0b;
   byte cur_nible;
-  for(int j = 0; j < 4; j++)
-  if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
-  else crc <<= 1;
-  
   for(int i = 0; i<8; i++) 
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
-   
+    if (i !=3)
+    {
       crc ^= cur_nible;
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-   
+    }  
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
-   
+    if (i !=2)
+    {
       crc ^= cur_nible;
       for(int j = 0; j < 4; j++)
       if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
       else crc <<= 1;
-   
+    }  
   }
   SendBuffer[7] += summ & 0x0F;
   SendBuffer[8] += summ & 0xF0;
