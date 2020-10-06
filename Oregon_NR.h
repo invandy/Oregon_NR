@@ -44,13 +44,14 @@
 // Распознавание пакетов от следующих датчиков Oregon Scientific:
 //
 #define THGN132   0x1D20 // Температура, влажность, 3 канала,
+#define THGN500   0x1D30 // Температура, влажность, 3 канала,
 #define THN132    0xEC40 // Температура,  3 канала,
 #define RTGN318   0x0CC3 // Температура, влажность, 5 каналов,
 #define THGR810   0xF824 // Температура, влажность, 10 каналов,
-#define THN800	  0xC844 // Температура,  10 каналов,
+#define THN800	  0xC844 // Температура,  3 канала,
 #define WGR800	  0x1984 // Направление и скорость ветра
 #define UVN800	  0xD874 // УФ-индекс, освещённость (спасибо XOR за предоставленные данные). 
-#define PCR800	  0x2914 // счётчик осадков, Пока нет данных о CRC8
+#define PCR800	  0x2914 // счётчик осадков
 
 //
 // Датчики собственной разработки:
@@ -62,7 +63,7 @@
 //
 //Этими параметрами можно поиграть для экономии ресурсов
 #define ADD_SENS_SUPPORT 1      // Поддежка дополнительных типов датчиков собственной разработки - отключение незначительно экономит ОЗУ
-#define IS_ASSEMBLE 1           // Пытаться ли собрать из двух повреждённых пакетов один целый (для v2) - отключение сильно экономит ОЗУ!
+
 
 //
 // Этими параметрами можно поиграть для настройки наилучшего приёма
@@ -79,6 +80,11 @@
 #define CATCH_PULSES 3		// Сколько искать правильных импульсов для начала захвата. Рекомендовано 2 - 4. 
                                 // Больше - можно не поймать пакет в условиях сильных шумов
                                 // Меньше - можно пропустить пакет, сильно отвлекаясь на анализ шумов
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                           
+//Эти параметры трогать не надо!
+
+#define IS_ASSEMBLE 1           // Пытаться ли собрать из двух повреждённых пакетов один целый (для v2) - отключение сильно экономит ОЗУ!
+
 
 #define PACKET_LENGTH 24        // Длина пакета в ниблах без учёта преамбулы и синхронибла,
                  		// максимальная у PCR800 - 22 нибла
@@ -99,8 +105,7 @@
                                 // v3 - 116 = 116
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                           
-//Эти параметры трогать не надо!
+
 
 #define FIND_PACKET   1           
 #define ANALIZE_PACKETS 2
@@ -113,6 +118,12 @@ static int RECEIVER_PIN;
 class Oregon_NR
 {
   public:
+
+    int packet_length = PACKET_LENGTH;
+    int no_read_bits = (PACKET_LENGTH + 8) * 4;
+    int no_read_tacts = (PACKET_LENGTH + 6) * 8;
+    bool is_assemble = IS_ASSEMBLE;
+    bool no_memory = false;
 
     //Данные датчика
     word sens_type;               //Sensor type
@@ -131,13 +142,14 @@ class Oregon_NR
     bool captured = 0;            //Capture data flag. Выставляется, если были считаны данные в память.
 
     unsigned long work_time;      //Capture time
-    byte packet[PACKET_LENGTH];   //Result packet
-    byte valid_p[PACKET_LENGTH];  //Validity mask - маска уверенного распознавания битов
+    byte* packet;   //Result packet
+    byte* valid_p;  //Validity mask - маска уверенного распознавания битов
     byte packets_received = 0;    //Number of received packets in block (0...2)
     byte received_CRC;            //Calculated СRC 
     
     Oregon_NR(byte, byte);          //Конструктор. Параметры:
     Oregon_NR(byte, byte, byte, bool);    //(вывод приёмника, номер прерывания, вывод светодиода, pull up)
+    Oregon_NR(byte, byte, byte, bool, int, bool);    //(вывод приёмника, номер прерывания, вывод светодиода, pull up, размер буфера)
     void start();                 //Star listening receiver
     void stop();                  //Stop listening receiver. Чтобы не занимал процессор, когда не нужен
     void capture(bool);           //Capture packet. if parameter is true function dumps capture data to Serial.
@@ -207,18 +219,18 @@ class Oregon_NR
     //bool  reciever_ctrl = true; //Флаг контроля ресивера (выставляется при приходе импулься, сбрасывается в таймере)
 
     //Массивы данных для записи данных с канала и полученных битов
-    byte decode_tacts[READ_TACTS]; //Массив тактов. значения
+    byte* decode_tacts;        //Массив тактов. значения
     //                          0=ноль
     //                          1=единица
     //                          2=неизвестен
     //                          3=переход+
     //                          4=переход-
 
-    byte collect_data[READ_TACTS], //Память для сбора данных с приёмника
+    byte* collect_data;         //Память для сбора данных с приёмника
 #if IS_ASSEMBLE
-    collect_data2[READ_TACTS];
+    byte* collect_data2;
 #else
-    collect_data2[1];
+    byte* collect_data2;
 #endif
     //А когда становится массивом полученных битов, то значения такие:
     //                          128 - неизвестен
