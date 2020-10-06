@@ -4,16 +4,17 @@
 // В данном примере описан ретранслятор пакетов 
 // Может быть полезен для увеличения дальности приёма сигналов от некоторых датчиков
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LED 13
-Oregon_NR oregon(2, 0);   // Приёмник на D2, прерывание 0
-Oregon_TM transmitter(4); // Передатчик на D4
+#define LED 13             //вывод светодиода
+#define MAX_SEND_BUFFER 30 //максимальный размер буфера передачи в ниблах
+Oregon_NR oregon(2, 0, 255, true, MAX_SEND_BUFFER, true);   // Приёмник на D2, прерывание 0, светодиод не нужен, буфера на 30 ниблов, сборка пакетов включена
+Oregon_TM transmitter(4, MAX_SEND_BUFFER);   // Передатчик на D4, буфер на 30 ниблов
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
    Serial.begin(115200);
    oregon.start();        // Включаем приёмник
-   pinMode(13, OUTPUT);
-   digitalWrite(13,LOW);
+   pinMode(LED, OUTPUT);
+   digitalWrite(LED,LOW);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ void loop() {
   if (oregon.captured)  
   {
     transmitter.buffer_size = 0;
-    for (int q = 0; q < PACKET_LENGTH; q++) 
+    for (int q = 0; q < oregon.packet_length; q++) 
     {
       if (oregon.valid_p[q] != 0x00)
       {
@@ -39,14 +40,22 @@ void loop() {
      || (oregon.packet[0] == 0x01 && oregon.packet[1] == 0x0D))
     
     {
-      Serial.println(" -> ");
+      Serial.println("\t -> ");
       delay(500); 
+
         
       //Подготавливаем буфер передачи
-      for ( int q = 0;q < OREGON_SEND_BUFFER_SIZE; q++)
-      {
-        transmitter.SendBuffer[q] = oregon.packet[q*2+1] + oregon.packet[q*2]*16;
-      }
+      //Добавляем в хвост флаг, что это ретранслируемый пакет
+      oregon.packet[transmitter.buffer_size] = 0x00;
+      transmitter.buffer_size ++;
+      oregon.packet[transmitter.buffer_size] = 0x00;
+      transmitter.buffer_size ++;
+      //переписываем буфер в передатчик
+      if (transmitter.buffer_size > MAX_SEND_BUFFER) transmitter.buffer_size = MAX_SEND_BUFFER;
+      //Переписываем буфер из приёмника в передатчик
+      for ( int q = 0; q < transmitter.max_buffer_size; q++)
+        transmitter.SendBuffer[q] = oregon.packet[q*2+1] + oregon.packet[q*2]*16;        
+
       //Будем передавать в том же протоколе, что и приняли
       transmitter.protocol = oregon.ver;
         
