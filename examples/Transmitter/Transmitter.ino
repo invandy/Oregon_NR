@@ -9,8 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Вывод передатчика один. Указывается только при создании первого объекта. В данном примере передатчик подключен к D4
 
-Oregon_TM transmitter(4), transmitter2, transmitter3;
-
+Oregon_TM transmitter(4, 19), transmitter2, transmitter3; //вывод передатчика достаточно указать один раз, 
+//Oregon_TM transmitter(4), transmitter2, transmitter3;     //по умолчанию размер буфера передачи 19 ниблов
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup()
 {
@@ -23,6 +23,7 @@ void setup()
   transmitter.setTemperature(24.2); // -50C...+70C
   transmitter.setHumidity(13);      // 2...98%
   transmitter.setComfort(24.2, 13); // Расчёт передаваемого индекса комфорта
+  transmitter.buffer_size = 19;
 
   //Второй передатчик
   transmitter2.setType(THGR810);    
@@ -31,6 +32,7 @@ void setup()
   transmitter2.setTemperature(+49.9); 
   transmitter2.setHumidity(98); 
   transmitter2.setComfort(+49.9, 98); 
+  transmitter2.buffer_size = 19;
 
   //Третий передатчик
   transmitter3.setType(RTGN318);
@@ -39,6 +41,7 @@ void setup()
   transmitter3.setTemperature(-31); 
   transmitter3.setHumidity(50); 
   transmitter3.setComfort(-31,50); 
+  transmitter2.buffer_size = 19;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,14 +59,14 @@ void PrintSentData(byte* buf)
 {
       Serial.print(millis() / 1000);
       Serial.print("s \t\t");
-      for (byte i = 0; i < 10; ++i)   
+      for (byte i = 0; i < transmitter.buffer_size; i++)   
       {
         byte trmbuf = *buf;
         Serial.print(trmbuf >> 4, HEX);
-        if (i < (10 - 1) )
+        i++;
+        if (i >= transmitter.buffer_size) break;
         Serial.print(trmbuf & 0x0F, HEX);
         buf++;
       }  
       Serial.println();
 }
-
