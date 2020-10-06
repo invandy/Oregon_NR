@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#i#include <Arduino.h>
 #ifndef Oregon_TM_h
 #define Oregon_TM_h
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
 
-#define OREGON_SEND_BUFFER_SIZE 30
+#define OREGON_SEND_BUFFER_SIZE 10
 
 static byte TX_PIN = 4;
 
@@ -59,13 +59,15 @@ class Oregon_TM
 {
   public:
 
-    int buffer_size = 19;
-    byte SendBuffer[OREGON_SEND_BUFFER_SIZE];
+    int max_buffer_size = OREGON_SEND_BUFFER_SIZE;
+    int  buffer_size = 19;
+    byte* SendBuffer;
     byte protocol = 2;
     word sens_type = 0x0000;               
     int timing_corrector2 = 4;
     int timing_corrector3 = 2;
 
+    Oregon_TM(byte, int); 
     Oregon_TM(byte); 
     Oregon_TM(); 
     void setType(word);
