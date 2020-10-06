@@ -1,22 +1,31 @@
 #include <Oregon_NR.h>
 
-#if defined ( ESP8266 ) || ( ESP32 )
-  Oregon_NR oregon(13, 13, 2, true); // приёмник на выводе D7 (GPIO13), Светодиод на D2 подтянут к +пит.
-#else
-  Oregon_NR oregon(2, 0, 13, false); // приёмник на выводе D2, Прерывание 0, Светодиод приёма на вывод 13
-//Oregon_NR oregon(2, 0); 	    // Если светодиод не нужен
+#if defined ( ESP8266 ) || ( ESP32 )// Для Wemos
+  Oregon_NR oregon(13, 13,          // приёмник на выводе D7 (GPIO13)
+                        2, true,    // Светодиод на D2 подтянут к +пит(true). Если светодиод не нужен, то номер вывода - 255
+                        50, true);  // Буфер на приём посылки из 50 ниблов, включена сборка пакетов для v2
+                                    
+#else                               // Для AVR
+  Oregon_NR oregon(2, 0,            // Приёмник на выводе D2, Прерывание 0, 
+                     13, false);    // Светодиод приёма на вывод 13
+                                    // По умолчанию Буфер на приём посылки стандартный - на 24 нибла, включена сборка пакетов для v2  
+                                    
+//Oregon_NR oregon(2, 0); 	        // Конструктор по умолчанию, со стандартным буфером и без светодиода
 #endif
 
 void setup() {
    Serial.begin(115200);
+   Serial.println();  
+   if (oregon.no_memory)
+   {
+    Serial.println("NO MEMORY");   //Не хватило памяти
+    do yield();
+    while(true);
+   }
+   
   //вкючение прослушивания радиоканала  
   oregon.start(); 
   oregon.receiver_dump = 0;       //true - Включает "осциллограф" - отображение данных, полученных с приёмника
-  
-  //Если не распознаются последние байты принятого пакета можно попробовать подстроить частоту захвата данных
-  oregon.timing_correction = 0;  // коррекция частоты завхвата данных. Обычно достаоточно подобрать значение от -5 до 5
-  oregon.decode_method = 3;      //или использовать метод 3 для декодирования
-
 }
 
 void loop() {
@@ -41,11 +50,11 @@ void loop() {
     else  Serial.print(" ");
     if (oregon.restore_sign & 0x04) Serial.print("p "); //исправленна ошибка при распознавании версии пакета
     else  Serial.print("  ");
-    if (oregon.restore_sign & 0x08) Serial.print("r "); //собран из двух кусков пакетов (при IS_ASSEMBLE == 1)
+    if (oregon.restore_sign & 0x08) Serial.print("r "); //собран из двух пакетов (для режима сборки в v.2)
     else  Serial.print("  ");
 
-    //Вывод полученного пакета. Точки - это ниблы, содержащие сомнительные биты
-    for (int q = 0;q < PACKET_LENGTH; q++)
+    //Вывод полученного пакета.
+    for (int q = 0;q < oregon.packet_length; q++)
       if (oregon.valid_p[q] == 0x0F) Serial.print(oregon.packet[q], HEX);
       else Serial.print(" ");
         
@@ -54,10 +63,11 @@ void loop() {
     Serial.print(oregon.work_time);
     Serial.print("ms ");
     
-    if ((oregon.sens_type == THGN132 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGR810 || oregon.sens_type == THN132 || oregon.sens_type == THN800) && oregon.crc_c){
+    if ((oregon.sens_type == THGN132 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGR810 || oregon.sens_type == THN132 || oregon.sens_type == THN800 || oregon.sens_type == THGN500 ) && oregon.crc_c){
       Serial.print("\t");
       Serial.print(" TYPE: ");
       if (oregon.sens_type == THGN132) Serial.print("THGN132N");
+      if (oregon.sens_type == THGN500) Serial.print("THGN500");
       if (oregon.sens_type == THGR810) Serial.print("THGR810 ");
       if ((oregon.sens_type & 0x0FFF) == RTGN318) Serial.print("RTGN318");
       if (oregon.sens_type == THN132 ) Serial.print("THN132N ");
@@ -70,14 +80,14 @@ void loop() {
       if (oregon.sens_tmp >= 10) Serial.print(" TMP: ");
       Serial.print(oregon.sens_tmp, 1);
       Serial.print("C ");
-      if (oregon.sens_type == THGN132 || oregon.sens_type == THGR810 || (oregon.sens_type & 0x0FFF) == RTGN318) {
+      if (oregon.sens_type == THGN132 || oregon.sens_type == THGR810 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGN500 ) {
         Serial.print("HUM: ");
         Serial.print(oregon.sens_hmdty, 0);
         Serial.print("%");
       }
       else Serial.print("        ");
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
       Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
     }
@@ -90,10 +100,28 @@ void loop() {
       Serial.print(oregon.sens_avg_ws, 1);
       Serial.print("m/s MAX WS: ");
       Serial.print(oregon.sens_max_ws, 1);
-      Serial.print("m/s WDIR: "); //N = 0, E = 4, S = 8, W = 12
-      Serial.print(oregon.sens_wdir);
+      Serial.print("m/s DIR: "); //N = 0, E = 4, S = 8, W = 12
+      switch (oregon.sens_wdir)
+      {
+      case 0: Serial.print("N"); break;
+      case 1: Serial.print("NNE"); break;
+      case 2: Serial.print("NE"); break;
+      case 3: Serial.print("NEE"); break;
+      case 4: Serial.print("E"); break;
+      case 5: Serial.print("SEEE"); break;
+      case 6: Serial.print("SE"); break;
+      case 7: Serial.print("SSE"); break;
+      case 8: Serial.print("S"); break;
+      case 9: Serial.print("SSW"); break;
+      case 10: Serial.print("SW"); break;
+      case 11: Serial.print("SWW"); break;
+      case 12: Serial.print("W"); break;
+      case 13: Serial.print("NWW"); break;
+      case 14: Serial.print("NW"); break;
+      case 15: Serial.print("NNW"); break;
+      }
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
       Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
     }    
@@ -105,7 +133,7 @@ void loop() {
       Serial.print(" UV IDX: ");
       Serial.print(oregon.UV_index);
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
       Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
     }    
@@ -116,10 +144,10 @@ void loop() {
       Serial.print("PCR800");
       Serial.print(" TOTAL: ");
       Serial.print(oregon.get_total_rain(), 1);
-      Serial.print(" AVERAGE: ");
+      Serial.print(" CURRENT: ");
       Serial.print(oregon.get_rain_rate(), 1);
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
       Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
     }    
@@ -150,4 +178,5 @@ void loop() {
 #endif
     Serial.println();
   }
+  yield();
 }
