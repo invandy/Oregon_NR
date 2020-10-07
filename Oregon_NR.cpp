@@ -474,11 +474,11 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       restore_data(packet, sens_type); // Восстанавливаем данные по типу датчика
       crc_c = check_CRC(packet, sens_type); // Проверяем CRC, если оно верно, то все сомнительные биты делаем уверенными
       //Если не все байты определены уверенно, нельзя считать, что пакет корректный
-      //byte secresingV;
-      //if (sens_type == THGN132 || (sens_type & 0xFF00) == GAS) secresingV = packet_length - 4;
-      //if (sens_type == THN132 || sens_type == THN800) secresingV = packet_length - 6;
-      //for (int www = 0; www < (packet_length - secresingV + 2); www++)
-      //if (valid_p[www] < 0x0f) crc_c = false;
+      byte secresingV;
+      if (sens_type == THGN132 || (sens_type & 0xFF00) == GAS) secresingV = packet_length - 4;
+      if (sens_type == THN132 || sens_type == THN800) secresingV = packet_length - 6;
+      for (int www = 0; www < (packet_length - secresingV + 2); www++)
+      if (valid_p[www] < 0x0f) crc_c = false;
       //Захват пакета происходит тольок в случае, если найдена стартовая последовательность (нибл синхронизации)
       //Если не было синхрониблов - то не о чем вообще разговаривать
       if ( synchro_pos != 255 && packet_number == 1)  captured = 1;
@@ -1483,51 +1483,50 @@ float Oregon_NR::get_rain_rate()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
+  if (sens_type==THN132)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0XD6, 16, false) ; 
+  }
+
   if (sens_type==THGN132)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X3C, 19) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X3C, 19, false) ;
   }
 
   if (sens_type==THGN500)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0XD8, 19) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0XD8, 19, false) ;
   }
 
   if ((sens_type & 0x0FFF) == RTGN318)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19, false) ;
   }
 
   if (sens_type == THGR810)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X0B, 19) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19, true) ;
   }
 
   if (sens_type == UVN800 )
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0XD4, 17) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X0, 17, true) ;
   }
 
 
   if (sens_type == WGR800)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0XB3, 21) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 21, true) ;
   }
-
 
   if (sens_type == PCR800)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X73, 22) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 22, true) ;
   }
 
-  if (sens_type==THN132)
+  if (sens_type == THN800)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0XD6, 16) ; 
-  }
-
-  if (sens_type==THN800)
-  {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X88, 16) ; 
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 16, true) ; 
   }
 
 #ifdef ADD_SENS_SUPPORT == 1
@@ -1546,8 +1545,9 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 // CCIT_POLY - образующий полином CRC
 // CCIT_START - начальное значение CRC
 // p_length - длина пакета 
+// v3 - ставится 1, если третья версия протокола
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Oregon_NR::check_oregon_crcsum(byte* oregon_data, byte CCIT_POLY, byte CCIT_START, byte p_length)
+bool Oregon_NR::check_oregon_crcsum(byte* oregon_data, byte CCIT_POLY, byte CCIT_START, byte p_length, bool v3)
 
 {
   byte* pp = oregon_data;
@@ -1555,7 +1555,7 @@ bool Oregon_NR::check_oregon_crcsum(byte* oregon_data, byte CCIT_POLY, byte CCIT
   for(int x=0; x < p_length - 4; x++)
   {
     cksum += *pp;
-    if ( x != 5 && x != 6)
+    if ( v3 || (x != 5 && x != 6))
     {
       crc ^= *pp;
       for(byte i = 0; i < 4; i++) 
