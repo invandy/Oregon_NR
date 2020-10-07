@@ -4,19 +4,19 @@ The folowed sensors data format are supported:<br>
 <br>
 Receive and emulate:<br>
 <dl>
-THGN132N (THGR122N, THGN123N),<br>
-RTGN318,<br>
-THGR810 (THGR800, THGR221).<br>
+<li>THGN132N (THGR122N, THGN123N),<br>
+<li>RTGN318,<br>
+<li>THGR810 (THGR800, THGR221).<br>
 </list>
 <br>
 Receive only:<br>
 <dl>
-THN132N (THR228N),<br>
-THGN500,<br>
-THN800,<br>
-WGR800,<br>
-UVN800,<br>
-PCR800<br>
+<li>THN132N (THR228N),<br>
+<li>THGN500,<br>
+<li>THN800,<br>
+<li>WGR800,<br>
+<li>UVN800,<br>
+<li>PCR800<br>
 </list>
 <br>
 Aslo supported self-developed sensors. Please contact author for additional infromation.<br>
@@ -28,18 +28,18 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 <br>
 Приём и эмуляция:<br>
 <dl>
-THGN132N (THGR122N, THGN123N),<br>
-RTGN318,<br>
-THGR810 (THGR800, THGR221).<br>
+<li>THGN132N (THGR122N, THGN123N),<li>
+<li>RTGN318,<li>
+<li>THGR810 (THGR800, THGR221).<li>
 </dl>
 <br>
 Тольок приём:<br>
 <dl>
-THN132N (THR228N),<br>
-THGN500,<br>
-WGR800,<br>	
-UVN800,<br>
-PCR800<br>
+<li>THN132N (THR228N),<li>
+<li>THGN500,<li>
+<li>WGR800,<li>
+<li>UVN800,<li>
+<li>PCR800<li>
 </dl>
 <br>
 Также поддерживаются датчики собственной разработки (за дополнительной документацей обращаться к автору)<br>
@@ -69,31 +69,31 @@ br>
 Новое в версии<br>
 20.9.26 <br>
 <dl>
-- Добавлена поддержка THN800, PCR800 (последний пока без CRC8)<br>
-- Добавлен CRC8 WGR800,<br>
-- Исправлен CRC8 RTGN318,<br>
-- Улучшены библиотека передатчика и пример ретранслятора<br>
-- ДОбавлена возможность сконфигурировать библиотеку под приём длинных пакетов<br>
+<li>Добавлена поддержка THN800, PCR800 (последний пока без CRC8)<li>
+<li>Добавлен CRC8 WGR800,<li>
+<li>Исправлен CRC8 RTGN318,<li>
+<li>Улучшены библиотека передатчика и пример ретранслятора<li>
+<li>ДОбавлена возможность сконфигурировать библиотеку под приём длинных пакетов<li>
 </dl>
 20.9.27 <br>
 <dl>
-- Добавлен CRC8 PCR800<br>
+<li>Добавлен CRC8 PCR800<li>
 </dl>
 20.9.28 <br>
 <dl>
-- Исправлена ошибка, приводящая к нестабильной работе при больших длинах пакета<br>
+<li>Исправлена ошибка, приводящая к нестабильной работе при больших длинах пакета<li>
 </dl>
 20.9.29 <br>
 <dl>
-- Исправлен CRC8 THGR810 в приёмнике и передатчики,<br>
-- Добавлен пример с поиском CRC8<br>
+<li>Исправлен CRC8 THGR810 в приёмнике и передатчики,<li>
+<li>Добавлен пример с поиском CRC8<li>
 </dl>
 20.10.6 <br>
 <dl>
-Добавлена поддержка THGN500<br>
-Возможность установки размера буферов приёма и передачи в конструкторе<br>
+<li>Добавлена поддержка THGN500<br>
+<li>Возможность установки размера буферов приёма и передачи в конструкторе<li>
 </dl>
 20.10.7 <br>
 <dl>
-Исправлены ошибки в подсчёте CRC8 третьей версии протокола<br>
+<li>Исправлены ошибки в подсчёте CRC8 третьей версии протокола
 </dl>
