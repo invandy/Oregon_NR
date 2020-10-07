@@ -206,7 +206,7 @@ class Oregon_NR
     unsigned long sens_drop_counter;// счётчик капель (for CAPRAIN sensor)
     int sens_capacitance;         //Емкость сенсора (for CAPRAIN sensor)
 #endif                                  
-    bool check_oregon_crcsum(byte*, byte , byte , byte );
+    bool check_oregon_crcsum(byte*, byte , byte , byte, bool );
 
   private:
 
