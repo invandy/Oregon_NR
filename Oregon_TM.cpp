@@ -349,7 +349,7 @@ void Oregon_TM::calculateAndSetChecksum810()
     }  
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
-    if (i !=2)
+
     {
       crc ^= cur_nible;
       for(int j = 0; j < 4; j++)
