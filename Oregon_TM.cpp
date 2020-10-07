@@ -335,13 +335,12 @@ void Oregon_TM::calculateAndSetChecksum810()
   SendBuffer[8] = 0x00;
   SendBuffer[9] = 0x00;
   byte summ = 0x00;
-  byte crc = 0x0b;
+  byte crc = 0x00;
   byte cur_nible;
   for(int i = 0; i<8; i++) 
   {
     cur_nible = (SendBuffer[i] & 0xF0) >> 4;
     summ += cur_nible;
-    if (i !=3)
     {
       crc ^= cur_nible;
       for(int j = 0; j < 4; j++)
