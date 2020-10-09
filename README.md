@@ -1,17 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////<br>
-This Arduino code is for receive and transmit data using Oregon Scientific RF protocol version 2.1 and 3.0. <br>
-The folowed sensors data format are supported:<br>
+This Arduino code is for receiving and transmitting data in Oregon Scientific RF protocol version 2.1 and 3.0. <br>
+The folowed sensors data format are supported including calculation of CRC8:<br>
 <br>
 Receive and emulate:<br>
 <dl>
-<li>THGN132N (THGR122N, THGN123N),</li>
-<li>RTGN318,</li>
-<li>THGR810 (THGR800, THGR221).</li>
+<li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
+<li>RTGN318 (RTGN130),</li>
+<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)).</li>
 </list>
 <br>
 Receive only:<br>
 <dl>
-<li>THN132N (THR228N),</li>
+<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268) - OSV2, </li>
+<li>RTHN318 (RTHR328N, RTHN129),</li>
+<li>BTHGN129,</li>
+<li>BTHR968,</li>
 <li>THGN500,</li>
 <li>THN800,</li>
 <li>WGR800,</li>
@@ -19,24 +22,29 @@ Receive only:<br>
 <li>PCR800.</li>
 </list>
 <br>
+
 Aslo supported self-developed sensors. Please contact author for additional infromation.<br>
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////<br>
 <br>
 Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0<br>
 <br>
-Поддерживается формат следующих датчиков<br>
+Поддерживается формат следующих датчиков, включая рассчёт CRC8.<br>
 <br>
 Приём и эмуляция:<br>
 <dl>
-<li>THGN132N (THGR122N, THGN123N),</li>
-<li>RTGN318,<li>
-<li>THGR810 (THGR800, THGR221).</li>
+<li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
+<li>RTGN318 (RTGN130),</li>
+<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)).</li>
 </dl>
 <br>
-Тольок приём:<br>
+Только приём:<br>
 <dl>
-<li>THN132N (THR228N),</li>
-<li>THGN500,</li>
+<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
+<li>RTHN318 (RTHR328N, RTHN129),</li>
+<li>BTHGN129,</li>
+<li>BTHR968,</li>
+<li>THGN500,</li>!
+<li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800.</li>
@@ -96,4 +104,12 @@ br>
 20.10.7 <br>
 <dl>
 <li>Исправлены ошибки в подсчёте CRC8 третьей версии протокола.</li>
+</dl>
+20.10.8 <br>
+<dl>
+<li>Добавлена поддержка RTHN318,</li>
+</dl>
+20.10.10 <br>
+<dl>
+<li>Добавлена поддержка BTHGN129 и BTHR968</li>
 </dl>
