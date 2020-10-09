@@ -1657,6 +1657,7 @@ bool Oregon_NR::check_oregon_crcsum(byte* oregon_data, byte CCIT_POLY, byte CCIT
     else crc <<= 1;
   recived_cksum = *pp + *(pp + 1)*0x10;
   recived_crc = *(pp + 2) + *(pp + 3)*0x10;
+  yield();
   return (recived_crc == crc && recived_cksum == cksum)? 1 : 0;  
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
