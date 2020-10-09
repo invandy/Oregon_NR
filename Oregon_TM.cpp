@@ -45,8 +45,8 @@
 
 Oregon_TM::Oregon_TM(byte tr_pin, int buf_size)
 {
-  max_buffer_size = (int)(buf_size / 2) + 1;
-  SendBuffer = new byte[max_buffer_size];
+  max_buffer_size = (int)(buf_size / 2) + 2;
+  SendBuffer = new byte[max_buffer_size + 2];
   TX_PIN = tr_pin;
   pinMode(TX_PIN, OUTPUT); 
   digitalWrite(TX_PIN, LOW);
@@ -55,7 +55,7 @@ Oregon_TM::Oregon_TM(byte tr_pin, int buf_size)
 
 Oregon_TM::Oregon_TM(byte tr_pin)
 {
-  SendBuffer = new byte[max_buffer_size];
+  SendBuffer = new byte[max_buffer_size + 2];
   TX_PIN = tr_pin;
   pinMode(TX_PIN, OUTPUT); 
   digitalWrite(TX_PIN, LOW);
@@ -64,7 +64,7 @@ Oregon_TM::Oregon_TM(byte tr_pin)
 
 Oregon_TM::Oregon_TM(void)
 {
-  SendBuffer = new byte[max_buffer_size];
+  SendBuffer = new byte[max_buffer_size + 2];
   pinMode(TX_PIN, OUTPUT); 
   digitalWrite(TX_PIN, LOW);
 }
@@ -330,7 +330,7 @@ void Oregon_TM::calculateAndSetChecksum318()
 
 void Oregon_TM::calculateAndSetChecksum810()
 {
-  byte CCIT_POLY = 0x07;
+ byte CCIT_POLY = 0x07;
   SendBuffer[7] = SendBuffer[7] & 0xF0;
   SendBuffer[8] = 0x00;
   SendBuffer[9] = 0x00;
@@ -349,7 +349,6 @@ void Oregon_TM::calculateAndSetChecksum810()
     }  
     cur_nible = SendBuffer[i] & 0x0F;
     summ += cur_nible;
-
     {
       crc ^= cur_nible;
       for(int j = 0; j < 4; j++)
