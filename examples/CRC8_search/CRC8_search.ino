@@ -17,7 +17,15 @@ void setup()
   Serial.println();
   Serial.println("VERSION\tPOLY\tSTART_SUM");
   Serial.println();
-  
+
+  Serial.println("BTHGN129");
+  hexCharacterStringToBytes(data1,"5D5323B051207389D13E528");
+  hexCharacterStringToBytes(data2,"5D5314D01510950AC13B529");
+  hexCharacterStringToBytes(data3,"5D5323B051207389D13E528");
+  packet_size = 23;
+  Calc();
+
+   
   Serial.println("THGR810");
   //hexCharacterStringToBytes(data1,"F8242248952031894F0");
   //hexCharacterStringToBytes(data1,"F8242248752031874BC");
@@ -76,25 +84,34 @@ void setup()
   packet_size = 19;
   Calc();
 
-  Serial.println("I300");
+  Serial.println("I300 HUB");
   hexCharacterStringToBytes(data1,"2915012A3021010171700171710F6F62E1020006032E8AE07");
   hexCharacterStringToBytes(data2,"2915012A3021010171700171710F6F62E1020006032E8AEC5");
   hexCharacterStringToBytes(data3,"2915012A3021010171700171710F6F62E1020007032F8DBAA");
   packet_size = 47;
   Calc();
 
-// I300  
-//  hexCharacterStringToBytes(data1,"00A5012A302400000000000000000000000000000000052F6");
-//  hexCharacterStringToBytes(data2,"00A5012A3023000000000000000000000000000000000421C");
-//  hexCharacterStringToBytes(data3,"00A5012A30220000000000000000000000000000000003212");
-//  packet_size = 49;
+  Serial.println("I300 HUB");
+  hexCharacterStringToBytes(data1,"00A5012A302400000000000000000000000000000000052F6");
+  hexCharacterStringToBytes(data2,"00A5012A3023000000000000000000000000000000000421C");
+  hexCharacterStringToBytes(data3,"00A5012A30220000000000000000000000000000000003212");
+  packet_size = 49;
+  Calc();
+  
+  Serial.println("BTHR968");
+  hexCharacterStringToBytes(data1,"5D600A50332004857933511");
+  hexCharacterStringToBytes(data2,"5D600A50332004857933511");
+  hexCharacterStringToBytes(data3,"5D600A50332004857933511");
+  packet_size = 23;
+  Calc();
+  
 
-//  Serial.println("THGN500");
-//  hexCharacterStringToBytes(data1,"1D301C94950016004F1");
-//  hexCharacterStringToBytes(data2,"1D301C94950016004F1");
-//  hexCharacterStringToBytes(data3,"1D301C94950016004F1");
-//  packet_size = 19;
-//  Calc();
+  Serial.println("THGN500");
+  hexCharacterStringToBytes(data1,"1D301C94950016004F1");
+  hexCharacterStringToBytes(data2,"1D301C94950016004F1");
+  hexCharacterStringToBytes(data3,"1D301C94950016004F1");
+  packet_size = 19;
+  Calc();
 
 Serial.println("DONE");
 }
