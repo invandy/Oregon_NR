@@ -63,44 +63,77 @@ void loop() {
     Serial.print(oregon.work_time);
     Serial.print("ms ");
     
-    if ((oregon.sens_type == THGN132 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGR810 || oregon.sens_type == THN132 || oregon.sens_type == THN800 || oregon.sens_type == THGN500 ) && oregon.crc_c){
+    if ((oregon.sens_type == THGN132 ||
+    (oregon.sens_type & 0x0FFF) == RTGN318 ||
+    (oregon.sens_type & 0x0FFF) == RTHN318 ||
+    oregon.sens_type == THGR810 ||
+    oregon.sens_type == THN132 ||
+    oregon.sens_type == THN800 ||
+    oregon.sens_type == BTHGN129 ||
+    oregon.sens_type == BTHR968 ||
+    oregon.sens_type == THGN500) && oregon.crc_c){
       Serial.print("\t");
-      Serial.print(" TYPE: ");
+      
       if (oregon.sens_type == THGN132) Serial.print("THGN132N");
-      if (oregon.sens_type == THGN500) Serial.print("THGN500");
+      if (oregon.sens_type == THGN500) Serial.print("THGN500 ");
       if (oregon.sens_type == THGR810) Serial.print("THGR810 ");
-      if ((oregon.sens_type & 0x0FFF) == RTGN318) Serial.print("RTGN318");
+      if ((oregon.sens_type & 0x0FFF) == RTGN318) Serial.print("RTGN318 ");
+      if ((oregon.sens_type & 0x0FFF) == RTHN318) Serial.print("RTHN318 ");
       if (oregon.sens_type == THN132 ) Serial.print("THN132N ");
-      if (oregon.sens_type == THN800 ) Serial.print("THN800");
-      Serial.print(" CHNL: ");
-      Serial.print(oregon.sens_chnl);
+      if (oregon.sens_type == THN800 ) Serial.print("THN800  ");
+      if (oregon.sens_type == BTHGN129 ) Serial.print("BTHGN129");
+      if (oregon.sens_type == BTHR968 ) Serial.print("BTHR968 ");
+
+      if (oregon.sens_type != BTHR968 && oregon.sens_type != THGN500)
+      {
+        Serial.print(" CHNL: ");
+        Serial.print(oregon.sens_chnl);
+      }
+      else Serial.print("        ");
+      Serial.print(" BAT: ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      Serial.print("ID: ");
+      Serial.print(oregon.sens_id, HEX);
+      
       if (oregon.sens_tmp >= 0 && oregon.sens_tmp < 10) Serial.print(" TMP:  ");
       if (oregon.sens_tmp < 0 && oregon.sens_tmp >-10) Serial.print(" TMP: ");
       if (oregon.sens_tmp <= -10) Serial.print(" TMP:");
       if (oregon.sens_tmp >= 10) Serial.print(" TMP: ");
       Serial.print(oregon.sens_tmp, 1);
       Serial.print("C ");
-      if (oregon.sens_type == THGN132 || oregon.sens_type == THGR810 || (oregon.sens_type & 0x0FFF) == RTGN318 || oregon.sens_type == THGN500 ) {
+      if (oregon.sens_type == THGN132 ||
+          oregon.sens_type == THGR810 ||
+          oregon.sens_type == BTHGN129 ||
+          oregon.sens_type == BTHR968 ||
+          (oregon.sens_type & 0x0FFF) == RTGN318 ||
+          oregon.sens_type == THGN500 ) {
         Serial.print("HUM: ");
         Serial.print(oregon.sens_hmdty, 0);
         Serial.print("%");
       }
       else Serial.print("        ");
-      Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
-      Serial.print("ID: ");
-      Serial.print(oregon.sens_id, HEX);
+
+      if (oregon.sens_type == BTHGN129 ||  oregon.sens_type == BTHR968)
+      {
+      Serial.print(" PRESS: ");
+      Serial.print(oregon.get_pressure(), 1);
+      Serial.print("Hgmm ");
+      }
     }
 
   if (oregon.sens_type == WGR800 && oregon.crc_c){
-      Serial.print("\t");
-      Serial.print(" TYPE: ");
-      Serial.print("WGR800");
-      Serial.print(" AVG WS: ");
+      Serial.print("\tWGR800  ");
+      Serial.print("        ");
+      Serial.print(" BAT: ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      Serial.print("ID: ");
+      Serial.print(oregon.sens_id, HEX);
+      
+      Serial.print(" AVG: ");
       Serial.print(oregon.sens_avg_ws, 1);
-      Serial.print("m/s MAX WS: ");
+      Serial.print("m/s  MAX: ");
       Serial.print(oregon.sens_max_ws, 1);
-      Serial.print("m/s DIR: "); //N = 0, E = 4, S = 8, W = 12
+      Serial.print("m/s  DIR: "); //N = 0, E = 4, S = 8, W = 12
       switch (oregon.sens_wdir)
       {
       case 0: Serial.print("N"); break;
@@ -120,45 +153,45 @@ void loop() {
       case 14: Serial.print("NW"); break;
       case 15: Serial.print("NNW"); break;
       }
-      Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
-      Serial.print("ID: ");
-      Serial.print(oregon.sens_id, HEX);
+      
     }    
 
     if (oregon.sens_type == UVN800 && oregon.crc_c){
-      Serial.print("\t");
-      Serial.print(" TYPE: ");
-      Serial.print("UVN800");
-      Serial.print(" UV IDX: ");
-      Serial.print(oregon.UV_index);
+      Serial.print("\tUVN800  ");
+      Serial.print("        ");
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
       Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
+      
+      Serial.print(" UV IDX: ");
+      Serial.print(oregon.UV_index);
+      
     }    
 
     if (oregon.sens_type == PCR800 && oregon.crc_c){
-      Serial.print("\t");
-      Serial.print(" TYPE: ");
-      Serial.print("PCR800");
-      Serial.print(" TOTAL: ");
-      Serial.print(oregon.get_total_rain(), 1);
-      Serial.print(" CURRENT: ");
-      Serial.print(oregon.get_rain_rate(), 1);
+      Serial.print("\tPCR800  ");
+      Serial.print("        ");
       Serial.print(" BAT: ");
-      if (oregon.sens_battery) Serial.print("OK  "); else Serial.print("low ");
-      Serial.print("ID: ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      Serial.print(" ID: ");
       Serial.print(oregon.sens_id, HEX);
+      Serial.print("   TOTAL: ");
+      Serial.print(oregon.get_total_rain(), 1);
+      Serial.print("mm  RATE: ");
+      Serial.print(oregon.get_rain_rate(), 1);
+      Serial.print("mm/h");
+      
     }    
     
 #if ADD_SENS_SUPPORT == 1
       if ((oregon.sens_type & 0xFF00) == THP && oregon.crc_c) {
-      Serial.print("\t");
-      Serial.print(" TYPE: ");
-      Serial.print("THP");
+      Serial.print("\tTHP     ");
       Serial.print(" CHNL: ");
       Serial.print(oregon.sens_chnl);
+      Serial.print(" BAT: ");
+      Serial.print(oregon.sens_voltage, 2);
+      Serial.print("V");
       if (oregon.sens_tmp > 0 && oregon.sens_tmp < 10) Serial.print(" TMP:  ");
       if (oregon.sens_tmp < 0 && oregon.sens_tmp > -10) Serial.print(" TMP: ");
       if (oregon.sens_tmp <= -10) Serial.print(" TMP:");
@@ -171,9 +204,7 @@ void loop() {
       Serial.print("PRESS: ");
       Serial.print(oregon.sens_pressure, 1);
       Serial.print("Hgmm");
-      Serial.print(" BAT: ");
-      Serial.print(oregon.sens_voltage, 2);
-      Serial.print("V");
+      
     }
 #endif
     Serial.println();
