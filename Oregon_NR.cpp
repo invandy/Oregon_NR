@@ -516,15 +516,35 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 ////////////////////////////////////////////////////////////////////////////////////////////////////    
 //Расшифровка датчиков Орегон
 ////////////////////////////////////////////////////////////////////////////////////////////////////    
-      if ((sens_type == THGN132 || sens_type == THN132 || sens_type == THN800 || (sens_type  & 0x0FFF)== RTGN318 || sens_type == THGR810 || sens_type == THGN500) && crc_c){
+      if ((sens_type == THGN132           ||
+           sens_type == THN132            ||
+           sens_type == THN800            ||
+          (sens_type  & 0x0FFF)== RTGN318 ||
+          (sens_type  & 0x0FFF)== RTHN318 ||
+           sens_type == THGR810           ||
+           sens_type == BTHGN129          ||
+           sens_type == BTHR968           ||
+           sens_type == THGN500) && crc_c)
+      {
 
       sens_id = get_id(packet);
       sens_chnl = get_channel(packet);
       sens_battery = get_battery(packet);
       sens_tmp = get_temperature(packet);
-      if (sens_type == THGN132 || (sens_type  & 0x0FFF)== RTGN318 || sens_type == THGR810 || sens_type == THGN500) 
+
+      if (sens_type == THGN132 ||
+         (sens_type  & 0x0FFF)== RTGN318 ||
+          sens_type == THGR810           ||
+          sens_type == BTHGN129          ||
+          sens_type == BTHR968           ||
+          sens_type == THGN500) 
         sens_hmdty = get_humidity(packet);
       else sens_hmdty = 0;
+    }
+
+    if (sens_type == PCR800 && crc_c){
+      sens_id = get_id(packet);
+      sens_battery = get_battery(packet);
     }
 
     if (sens_type == WGR800 && crc_c){
@@ -1278,7 +1298,15 @@ int Oregon_NR::get_info_data(byte* code, byte* result, byte* valid){
 //oregon_data - указатель на кодовую посылку
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 float Oregon_NR::get_temperature(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THGN500 || sens_type == THN132 || sens_type == THN800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 ||
+       (sens_type & 0x0FFF) == RTHN318 || 
+        sens_type == THGR810 ||
+        sens_type == THGN132 ||
+        sens_type == THGN500 ||
+        sens_type == THN132 ||
+        sens_type == BTHGN129 ||
+        sens_type == BTHR968  ||
+        sens_type == THN800) && crc_c)
   {
     float tmprt;
     oregon_data += 8;
@@ -1323,7 +1351,13 @@ byte Oregon_NR::get_channel(byte* oregon_data){
         break;  
       }  
     }
-    if ((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810  || sens_type == THN800 || sens_type == THGN500)
+    if ((sens_type & 0x0FFF) == RTGN318 ||
+        (sens_type & 0x0FFF) == RTHN318 ||
+         sens_type == THGR810  ||
+         sens_type == THN800 ||
+         sens_type == BTHGN129 ||
+         sens_type == BTHR968  ||
+         sens_type == THGN500)
         channel = *(oregon_data + 4);  
     return channel;  
   }
@@ -1332,7 +1366,18 @@ byte Oregon_NR::get_channel(byte* oregon_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_battery(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THGN500  || sens_type == THN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == PCR800 ||  sens_type == UVN800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 ||
+       (sens_type & 0x0FFF) == RTHN318 ||
+        sens_type == THGR810 ||
+        sens_type == THGN132 ||
+        sens_type == THGN500  ||
+        sens_type == THN132 ||
+        sens_type == BTHGN129 ||
+        sens_type == BTHR968  ||
+        sens_type == THN800 ||
+        sens_type == WGR800 ||
+        sens_type == PCR800 ||
+        sens_type == UVN800) && crc_c)
   return (*(oregon_data+7) & 0x4) ? 0 : 1;  
   else  return 0;
 }
@@ -1342,7 +1387,11 @@ byte Oregon_NR::get_battery(byte* oregon_data){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 float Oregon_NR::get_humidity(byte* oregon_data){
 
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132)  && crc_c ){
+  if (((sens_type & 0x0FFF) == RTGN318 ||
+        sens_type == THGR810 ||
+        sens_type == BTHGN129 ||
+        sens_type == BTHR968  ||
+        sens_type == THGN132)  && crc_c ){
     byte tmprt = 0;
     oregon_data += 12;
   //исправляем возможные ошибки:
@@ -1358,7 +1407,19 @@ float Oregon_NR::get_humidity(byte* oregon_data){
 //oregon_data - указатель на кодовую посылку
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 byte Oregon_NR::get_id(byte* oregon_data){
-  if (((sens_type & 0x0FFF) == RTGN318 || sens_type == THGR810 || sens_type == THGN132 || sens_type == THGN500 || sens_type == THN132 || sens_type == THN800 ||  sens_type == WGR800 ||  sens_type == UVN800 ||  sens_type == PCR800) && crc_c)
+  if (((sens_type & 0x0FFF) == RTGN318 ||
+       (sens_type & 0x0FFF) == RTHN318 ||
+        sens_type == THGR810 ||
+        sens_type == THGN132 ||
+        sens_type == THGN500  ||
+        sens_type == THN132 ||
+        sens_type == BTHGN129 ||
+        sens_type == BTHR968  ||
+        sens_type == THN800 ||
+        sens_type == WGR800 ||
+        sens_type == PCR800 ||
+        sens_type == UVN800) && crc_c)
+
   {
     byte tmprt;
     oregon_data += 5;
@@ -1443,6 +1504,21 @@ byte Oregon_NR::get_light(byte* oregon_data)
   }
   else return 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Возвращает давление
+//oregon_data - указатель на кодовую посылку
+////////////////////////////////////////////////////////////////////////////////////////////////////
+float Oregon_NR::get_pressure()
+{
+  if (sens_type == BTHGN129 && crc_c){
+    return ((float)(*(packet + 15) +*(packet + 16) * 16) * 2 + (float)(*(packet + 16) & 0x01) + 597) * 0.75;
+  }
+   if (sens_type == BTHR968 && crc_c){
+    return ((float)(*(packet + 15) +*(packet + 16) * 16) + 856) * 0.75;
+  }
+  else return 0;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Возвращает данные с датчика дождя
 //oregon_data - указатель на кодовую посылку
@@ -1457,8 +1533,7 @@ float Oregon_NR::get_total_rain()
     tmprt += *(packet + 14) * 100;
     tmprt += *(packet + 13) * 10;
     tmprt += *(packet + 12);
-    tmprt *= 25;
-    return tmprt / 1000;
+    return tmprt * 0.0254;
   }
   else return 0;
 }
@@ -1467,13 +1542,11 @@ float Oregon_NR::get_rain_rate()
 {
   if (sens_type == PCR800 && crc_c){
     float tmprt; 
-    tmprt = *(packet + 7) * 10000;
     tmprt += *(packet + 8) * 1000;
     tmprt += *(packet + 9) * 100;
     tmprt += *(packet + 10) * 10;
     tmprt += *(packet + 11);
-    tmprt *= 25;
-    return tmprt / 1000;
+    return tmprt * 0.0254;
   }
   else return 0;
 }
@@ -1501,6 +1574,21 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
   if ((sens_type & 0x0FFF) == RTGN318)
   {
      return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19, false) ;
+  }
+
+  if (sens_type == BTHGN129)
+  {
+    return check_oregon_crcsum(oregon_data, 0X07, 0X00, 23, false) ;
+  }
+
+  if (sens_type == BTHR968)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X26, 23, false) ;
+  }
+
+  if ((sens_type & 0x0FFF) == RTHN318)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 16, false) ;
   }
 
   if (sens_type == THGR810)
