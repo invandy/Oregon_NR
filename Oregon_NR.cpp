@@ -547,6 +547,12 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       sens_battery = get_battery(packet);
     }
 
+    if (sens_type == RFCLOCK && crc_c){
+      sens_id = get_id(packet);
+      sens_chnl = get_channel(packet);
+      sens_battery = get_battery(packet);
+    }
+
     if (sens_type == WGR800 && crc_c){
       sens_id = get_id(packet);
       sens_battery = get_battery(packet);
@@ -1355,6 +1361,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
     }
     if ((sens_type & 0x0FFF) == RTGN318 ||
         (sens_type & 0x0FFF) == RTHN318 ||
+        (sens_type  & 0x0FFF)== RFCLOCK ||
          sens_type == THGR810  ||
          sens_type == THN800 ||
          sens_type == BTHGN129 ||
@@ -1370,6 +1377,7 @@ byte Oregon_NR::get_channel(byte* oregon_data){
 byte Oregon_NR::get_battery(byte* oregon_data){
   if (((sens_type & 0x0FFF) == RTGN318 ||
        (sens_type & 0x0FFF) == RTHN318 ||
+       (sens_type  & 0x0FFF)== RFCLOCK ||
         sens_type == THGR810 ||
         sens_type == THGN132 ||
         sens_type == THGN500  ||
@@ -1420,6 +1428,7 @@ byte Oregon_NR::get_id(byte* oregon_data){
         sens_type == THN800 ||
         sens_type == WGR800 ||
         sens_type == PCR800 ||
+        sens_type == RFCLOCK ||
         sens_type == UVN800) && crc_c)
 
   {
@@ -1529,7 +1538,7 @@ float Oregon_NR::get_total_rain()
 {
   if (sens_type == PCR800 && crc_c){
     float tmprt;
-    tmprt = *(packet + 17) * 100000;
+    tmprt =  *(packet + 17) * 100000;
     tmprt += *(packet + 16) * 10000;
     tmprt += *(packet + 15) * 1000;
     tmprt += *(packet + 14) * 100;
@@ -1544,11 +1553,11 @@ float Oregon_NR::get_rain_rate()
 {
   if (sens_type == PCR800 && crc_c){
     float tmprt; 
-    tmprt += *(packet + 8) * 1000;
-    tmprt += *(packet + 9) * 100;
-    tmprt += *(packet + 10) * 10;
-    tmprt += *(packet + 11);
-    return tmprt * 0.0254;
+    tmprt += *(packet + 11) * 1000;
+    tmprt += *(packet + 10) * 100;
+    tmprt += *(packet + 9) * 10;
+    tmprt += *(packet + 8);
+    return tmprt * 0.254;
   }
   else return 0;
 }
@@ -1576,6 +1585,11 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
   if ((sens_type & 0x0FFF) == RTGN318)
   {
      return check_oregon_crcsum(oregon_data, 0X07, 0X00, 19, false) ;
+  }
+
+  if ((sens_type & 0x0FFF) == RFCLOCK)
+  {
+     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 25, false) ;
   }
 
   if (sens_type == BTHGN129)
