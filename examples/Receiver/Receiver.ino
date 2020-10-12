@@ -161,12 +161,42 @@ void loop() {
       Serial.print("        ");
       Serial.print(" BAT: ");
       if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
-      Serial.print("ID: ");
+      Serial.print(" ID: ");
       Serial.print(oregon.sens_id, HEX);
       
-      Serial.print(" UV IDX: ");
+      Serial.print(" UVI: ");
       Serial.print(oregon.UV_index);
       
+    }    
+
+
+    if (oregon.sens_type == RFCLOCK && oregon.crc_c){
+      Serial.print("\tCLOCK   ");
+      Serial.print(" CHNL: ");
+      Serial.print(oregon.sens_chnl);
+      Serial.print(" BAT: ");
+      if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
+      Serial.print(" ID: ");
+      Serial.print(oregon.sens_id, HEX);
+      Serial.print(" TIME: ");
+      Serial.print(oregon.packet[13], HEX);
+      Serial.print(oregon.packet[12], HEX);
+      Serial.print(':');
+      Serial.print(oregon.packet[11], HEX);
+      Serial.print(oregon.packet[10], HEX);
+      Serial.print(':');
+       Serial.print(oregon.packet[9], HEX);
+      Serial.print(oregon.packet[8], HEX);
+      Serial.print(" DATE: ");
+      Serial.print(oregon.packet[15], HEX);
+      Serial.print(oregon.packet[14], HEX);
+      Serial.print('.');
+      if (oregon.packet[17] ==1 || oregon.packet[17] ==3)   Serial.print('1');
+      else Serial.print('0');
+      Serial.print(oregon.packet[16], HEX);
+      Serial.print('.');
+      Serial.print(oregon.packet[19], HEX);
+      Serial.print(oregon.packet[18], HEX);
     }    
 
     if (oregon.sens_type == PCR800 && oregon.crc_c){
