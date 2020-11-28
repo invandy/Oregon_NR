@@ -10,11 +10,14 @@ Oregon_NR oregon(2, 0, 255, true, MAX_SEND_BUFFER, true);   // Приёмник 
 Oregon_TM transmitter(4, MAX_SEND_BUFFER);   // Передатчик на D4, буфер на 30 ниблов
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void(* resetFunc) (void) = 0;
+
 void setup() {
    Serial.begin(115200);
    oregon.start();        // Включаем приёмник
    pinMode(LED, OUTPUT);
    digitalWrite(LED,LOW);
+   Serial.println("START");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +26,7 @@ void loop() {
   oregon.capture(0);
   if (oregon.captured)  
   {
+   if (micros() > 3600000000) resetFunc();
     transmitter.buffer_size = 0;
     for (int q = 0; q < oregon.packet_length; q++) 
     {
@@ -37,6 +41,7 @@ void loop() {
     if ((oregon.packet[0] == 0x0E && oregon.packet[1] == 0x0C)
     //Например, нам нужно ретранслировать пакет, если первые два нибла пакета 19h (датчик WGR800)
      || (oregon.packet[0] == 0x01 && oregon.packet[1] == 0x09)
+     || (oregon.packet[0] == 0x05 && oregon.packet[1] == 0x05)
      || (oregon.packet[0] == 0x01 && oregon.packet[1] == 0x0D))
     
     {
@@ -67,3 +72,4 @@ void loop() {
     else Serial.println(' ');
   }
 }
+
