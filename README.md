@@ -1,4 +1,5 @@
 
+
 This Arduino code is for receiving and transmitting data in Oregon Scientific RF protocol version 2.1 and 3.0. <br>
 The folowed sensors data format are supported including calculation of CRC8:<br>
 <br>
@@ -72,9 +73,8 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 Блокировка навсегда возможна и при неправильном сочетании номера канала и ID датчика. Этот вопрос пока до конца не изучен<br>
 br>
 Передача сигналов в формате RTGN318 и THGR810 до конца не протестирована. Поэтому возможны проблемы с приёмом этих сигналов погодной станцией<br>
-на отдельных каналах<br><br>
-
-
+на отдельных каналах<br>
+Полное описание протокола: <href>https://habr.com/ru/post/525446/</href><br><br>
 Новое в версии<br>
 20.9.26 <br>
 <dl>
@@ -118,6 +118,11 @@ br>
 <dl>
 <li>Улучшен приём на ESP</li>
 <li>Исправлена расшифровка данных PCR800 и UVN800</li>
-<li>ДОбавлена расшифровка времени RF CLOCK (бета)</li>
+<li></li>
+</dl>
+20.11.28<br>
+<dl>
+<li>Исправлена ошибка с некорректным определением версии пакета</li>
+<li>Улучшен тайминг передатчика</li>
 <li></li>
 </dl>
