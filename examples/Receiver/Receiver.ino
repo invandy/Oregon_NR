@@ -29,6 +29,7 @@ void setup() {
 }
 
 void loop() {
+
   //////////////////////////////////////////////////////////////////////
   //Захват пакета,/////////////////////////////////////////////////////
   oregon.capture(0); // 1 - выводить в Serial сервисную информацию
@@ -73,6 +74,8 @@ void loop() {
     oregon.sens_type == BTHR968 ||
     oregon.sens_type == THGN500) && oregon.crc_c){
       Serial.print("\t");
+      
+      
       
       if (oregon.sens_type == THGN132) Serial.print("THGN132N");
       if (oregon.sens_type == THGN500) Serial.print("THGN500 ");
@@ -161,42 +164,44 @@ void loop() {
       Serial.print("        ");
       Serial.print(" BAT: ");
       if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
-      Serial.print(" ID: ");
+      Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
       
-      Serial.print(" UVI: ");
+      Serial.print(" UV IDX: ");
       Serial.print(oregon.UV_index);
       
     }    
 
 
     if (oregon.sens_type == RFCLOCK && oregon.crc_c){
-      Serial.print("\tCLOCK   ");
+      Serial.print("\tRF CLOCK");
       Serial.print(" CHNL: ");
       Serial.print(oregon.sens_chnl);
       Serial.print(" BAT: ");
       if (oregon.sens_battery) Serial.print("F "); else Serial.print("e ");
-      Serial.print(" ID: ");
+      Serial.print("ID: ");
       Serial.print(oregon.sens_id, HEX);
       Serial.print(" TIME: ");
-      Serial.print(oregon.packet[13], HEX);
-      Serial.print(oregon.packet[12], HEX);
+      Serial.print(oregon.packet[6] & 0x0F, HEX);
+      Serial.print(oregon.packet[6] & 0xF0 >> 4, HEX);
       Serial.print(':');
-      Serial.print(oregon.packet[11], HEX);
-      Serial.print(oregon.packet[10], HEX);
+      Serial.print(oregon.packet[5] & 0x0F, HEX);
+      Serial.print(oregon.packet[5] & 0xF0 >> 4, HEX);
       Serial.print(':');
-       Serial.print(oregon.packet[9], HEX);
-      Serial.print(oregon.packet[8], HEX);
+      Serial.print(':');
+      Serial.print(oregon.packet[4] & 0x0F, HEX);
+      Serial.print(oregon.packet[4] & 0xF0 >> 4, HEX);
       Serial.print(" DATE: ");
-      Serial.print(oregon.packet[15], HEX);
-      Serial.print(oregon.packet[14], HEX);
+      Serial.print(oregon.packet[7] & 0x0F, HEX);
+      Serial.print(oregon.packet[7] & 0xF0 >> 4, HEX);
       Serial.print('.');
-      if (oregon.packet[17] ==1 || oregon.packet[17] ==3)   Serial.print('1');
+      if (oregon.packet[8] & 0x0F ==1 || oregon.packet[8] & 0x0F ==3)   Serial.print('1');
       else Serial.print('0');
-      Serial.print(oregon.packet[16], HEX);
+      Serial.print(oregon.packet[8] & 0xF0 >> 4, HEX);
       Serial.print('.');
-      Serial.print(oregon.packet[19], HEX);
-      Serial.print(oregon.packet[18], HEX);
+      Serial.print(oregon.packet[9] & 0x0F, HEX);
+      Serial.print(oregon.packet[9] & 0xF0 >> 4, HEX);
+      
     }    
 
     if (oregon.sens_type == PCR800 && oregon.crc_c){
@@ -239,5 +244,6 @@ void loop() {
 #endif
     Serial.println();
   }
+
   yield();
 }
