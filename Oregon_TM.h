@@ -41,12 +41,11 @@
 
 #define TR_TIME 488
 #define TWOTR_TIME 976
-#define PULSE_SHORTEN_2   80
-#define PULSE_SHORTEN_3   120
+#define PULSE_SHORTEN_2   93
+#define PULSE_SHORTEN_3   138
 
 #define THGN132   0x1D20 
 #define THGR810   0xF824
-#define THТ800    0xС844
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
 
