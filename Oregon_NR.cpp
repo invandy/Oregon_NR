@@ -1616,7 +1616,7 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type){
 
   if (sens_type == BTHR968)
   {
-     return check_oregon_crcsum(oregon_data, 0X07, 0X26, 23, false) ;
+     return check_oregon_crcsum(oregon_data, 0X07, 0XA1, 23, false) ;
   }
 
   if ((sens_type & 0x0FFF) == RTHN318)
