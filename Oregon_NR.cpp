@@ -6,7 +6,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2020 Sergey Zawislak 
+// Copyright (c) 2021 Sergey Zawislak 
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -23,7 +23,7 @@
 //  Этот файл - часть библиотеки OREGON_NR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2020 Сергей Зависляк
+// Copyright (c) 2021 Сергей Зависляк
 //
 // Данная лицензия разрешает лицам, получившим копию данного программного обеспечения и сопутствующей документации 
 // (в дальнейшем именуемыми «Программное Обеспечение»), безвозмездно использовать Программное Обеспечение без ограничений,
@@ -1540,10 +1540,10 @@ byte Oregon_NR::get_light(byte* oregon_data)
 float Oregon_NR::get_pressure()
 {
   if (sens_type == BTHGN129 && crc_c){
-    return ((float)(*(packet + 15) +*(packet + 16) * 16) * 2 + (float)(*(packet + 16) & 0x01) + 597) * 0.75;
+    return (float)(*(packet + 15) + (*(packet + 16) << 4)  + ((*(packet + 17) & 0x01) << 8) + 545) * 0.75;
   }
    if (sens_type == BTHR968 && crc_c){
-    return ((float)(*(packet + 15) +*(packet + 16) * 16) + 856) * 0.75;
+    return (float)(*(packet + 15) + (*(packet + 16) << 4)  + ((*(packet + 17) & 0x01) << 8) + 600) * 0.75;
   }
   else return 0;
 }
