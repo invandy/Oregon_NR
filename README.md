@@ -7,20 +7,20 @@ Receive and emulate:<br>
 <dl>
 <li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
 <li>RTGN318 (RTGN130),</li>
-<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)).</li>
-</list>
-<br>
+<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)),</li>
+<li>BTHGN129,</li>
+<li>BTHR968.</li>
+</dl>
 Receive only:<br>
 <dl>
-<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268) - OSV2, </li>
+<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTHN318 (RTHR328N, RTHN129),</li>
-<li>BTHGN129,</li>
-<li>BTHR968,</li>
 <li>THGN500,</li>
 <li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800.</li>
+</dl>
 </list>
 <br><br>
 
@@ -35,16 +35,16 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 <dl>
 <li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
 <li>RTGN318 (RTGN130),</li>
-<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)).</li>
+<li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)),</li>
+<li>BTHGN129,</li>
+<li>BTHR968.</li>
 </dl>
 <br>
 Только приём:<br>
 <dl>
 <li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTHN318 (RTHR328N, RTHN129),</li>
-<li>BTHGN129,</li>
-<li>BTHR968,</li>
-<li>THGN500,</li>!
+<li>THGN500,</li>
 <li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
@@ -124,5 +124,11 @@ br>
 <dl>
 <li>Исправлена ошибка с некорректным определением версии пакета</li>
 <li>Улучшен тайминг передатчика</li>
+<li></li>
+</dl>
+21.01.28<br>
+<dl>
+<li>ДОбавлен эмулятор передатчиков BTHR968 и BTHGN129</li>
+<li>Исправлена ошибка при рассчёте давления для этих же датчиков</li>
 <li></li>
 </dl>
