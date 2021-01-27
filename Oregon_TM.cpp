@@ -6,7 +6,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2020 Sergey Zawislak 
+// Copyright (c) 2021 Sergey Zawislak 
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -23,7 +23,7 @@
 //  Этот файл - часть библиотеки OREGON_NR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2020 Сергей Зависляк
+// Copyright (c) 2021 Сергей Зависляк
 //
 // Данная лицензия разрешает лицам, получившим копию данного программного обеспечения и сопутствующей документации 
 // (в дальнейшем именуемыми «Программное Обеспечение»), безвозмездно использовать Программное Обеспечение без ограничений,
@@ -227,6 +227,7 @@ void Oregon_TM::sendOregon()
     sendPreamble();
     sendLSB(0xA);
     sendData();
+    sendZero();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -250,6 +251,81 @@ void Oregon_TM::sendPreamble(void)
     sendLSB(0xF);
     time_marker += 3;
   }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+void Oregon_TM::calculateAndSetChecksum129(void)
+{
+  byte CCIT_POLY = 0x07;
+  SendBuffer[9] &= 0xF0;
+  SendBuffer[10] = 0x00;
+  SendBuffer[11] = 0x00;
+  byte summ = 0x00;
+  byte crc = 0x00;
+  byte cur_nible;
+  for(int i = 0; i < 10; i++) 
+  {
+    cur_nible = (SendBuffer[i] & 0xF0) >> 4;
+    summ += cur_nible;
+    if (i != 3)
+    {
+      crc ^= cur_nible;
+      for(int j = 0; j < 4; j++)
+      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+      else crc <<= 1;
+    }  
+    cur_nible = SendBuffer[i] & 0x0F;
+    summ += cur_nible;
+    if (i != 2)
+    {
+      crc ^= cur_nible;
+      for(int j = 0; j < 4; j++)
+      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+      else crc <<= 1;
+    }  
+  }
+  SendBuffer[9] += summ & 0x0F;
+  SendBuffer[10] += summ & 0xF0;
+  SendBuffer[10] += crc & 0x0F;
+  SendBuffer[11] += crc & 0xF0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+void Oregon_TM::calculateAndSetChecksum968(void)
+{
+  byte CCIT_POLY = 0x07;
+  SendBuffer[9] &= 0xF0;
+  SendBuffer[10] = 0x00;
+  SendBuffer[11] = 0x00;
+  byte summ = 0x00;
+  byte crc = 0xA1;
+  byte cur_nible;
+  for(int i = 0; i < 10; i++) 
+  {
+    cur_nible = (SendBuffer[i] & 0xF0) >> 4;
+    summ += cur_nible;
+    if (i != 3)
+    {
+      crc ^= cur_nible;
+      for(int j = 0; j < 4; j++)
+      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+      else crc <<= 1;
+    }  
+    cur_nible = SendBuffer[i] & 0x0F;
+    summ += cur_nible;
+    if (i != 2)
+    {
+      crc ^= cur_nible;
+      for(int j = 0; j < 4; j++)
+      if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+      else crc <<= 1;
+    }  
+  }
+  SendBuffer[9] += summ & 0x0F;
+  SendBuffer[10] += summ & 0xF0;
+  SendBuffer[10] += crc & 0x0F;
+  SendBuffer[11] += crc & 0xF0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +441,10 @@ void Oregon_TM::calculateAndSetChecksum810()
 
 void Oregon_TM::SendPacket()
 {
+  if (sens_type == BTHR968)
+    calculateAndSetChecksum968();
+  if (sens_type == BTHGN129)
+    calculateAndSetChecksum129();
   if (sens_type == THGN132)
     calculateAndSetChecksum132();
   if (sens_type == RTGN318)
@@ -373,7 +453,6 @@ void Oregon_TM::SendPacket()
     calculateAndSetChecksum810();
   if (sens_type == THP)
     calculateAndSetChecksumTHP();
-
   
   sendOregon();
   digitalWrite(TX_PIN, LOW);
@@ -403,6 +482,14 @@ void Oregon_TM::setType(word type)
 void Oregon_TM::setChannel(byte channel)
   {
     byte channel_code;
+
+    if (sens_type == BTHR968)
+    {
+        channel_code = 0x00; 
+        setId(0xF0);
+        send_time = 40000;
+    }
+
     if (sens_type == THGN132)
     {
       if (channel <= 1) 
@@ -426,7 +513,7 @@ void Oregon_TM::setChannel(byte channel)
       protocol = 2;
     }
 
-    if (sens_type == RTGN318)
+    if (sens_type == RTGN318 || sens_type == BTHGN129)
     {
 
       if (channel <= 1) 
@@ -551,8 +638,40 @@ void Oregon_TM::setStartCount(byte startcount)
     if (startcount == 2) SendBuffer[3] |= 0x02;
     if (startcount == 1) SendBuffer[3] |= 0x01;
   }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
+void Oregon_TM::setPressure(float mm_hg_pressure)
+  {
+    //Ограничения датчика по даташиту
+    word pressure =  (word)(mm_hg_pressure / 0.75);
+    if (mm_hg_pressure < 450) pressure = 600;
+    if (mm_hg_pressure > 790) pressure = 1054;
+
+    if(sens_type == BTHR968)
+    {
+      pressure -=  600;
+      SendBuffer[7] &= 0xF0;
+      SendBuffer[7] += pressure & 0x0F;
+      SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
+      //прогноз - переменно
+      SendBuffer[9] &= 0x0F;
+      SendBuffer[9] += 0x60;
+    }
+
+    if(sens_type == BTHGN129)
+    {
+      pressure -=  545;
+      SendBuffer[7] &= 0xF0;
+      SendBuffer[7] += pressure & 0x0F;
+      SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
+      SendBuffer[9] &= 0x0F;
+      SendBuffer[9] += 0x60;
+    }
+
+  }
+///////////////////////////////////////////////////////////////////////////////////////////////////  
 void Oregon_TM::setTemperature(float temp)
   {
     if(temp < 0)
