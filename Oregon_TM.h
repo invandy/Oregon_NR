@@ -7,7 +7,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2020 Sergey Zawislak 
+// Copyright (c) 2021 Sergey Zawislak 
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -24,7 +24,7 @@
 //  Этот файл - часть библиотеки OREGON_NR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2020 Сергей Зависляк
+// Copyright (c) 2021 Сергей Зависляк
 //
 // Данная лицензия разрешает лицам, получившим копию данного программного обеспечения и сопутствующей документации 
 // (в дальнейшем именуемыми «Программное Обеспечение»), безвозмездно использовать Программное Обеспечение без ограничений,
@@ -48,8 +48,11 @@
 #define THGR810   0xF824
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
+#define BTHGN129  0x5D53 
+#define BTHR968   0x5D60 
 
-#define OREGON_SEND_BUFFER_SIZE 10
+
+#define OREGON_SEND_BUFFER_SIZE 12
 
 static byte TX_PIN = 4;
 
@@ -59,7 +62,7 @@ class Oregon_TM
   public:
 
     int max_buffer_size = OREGON_SEND_BUFFER_SIZE;
-    int  buffer_size = 19;
+    int  buffer_size = 24;
     byte* SendBuffer;
     byte protocol = 2;
     word sens_type = 0x0000;               
@@ -77,6 +80,7 @@ class Oregon_TM
     void setTemperature(float);
     void setHumidity(byte);
     void setComfort(float, byte);
+    void setPressure(float);
     bool transmit();
     void SendPacket();
 
@@ -101,6 +105,8 @@ class Oregon_TM
     void calculateAndSetChecksum132();
     void calculateAndSetChecksum318();
     void calculateAndSetChecksum810();
+    void calculateAndSetChecksum968();
+    void calculateAndSetChecksum129();
 
 
     void calculateAndSetChecksumTHP();
