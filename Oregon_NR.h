@@ -8,7 +8,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2020 Sergey Zawislak 
+// Copyright (c) 2021 Sergey Zawislak 
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -25,7 +25,7 @@
 //  Этот файл - часть библиотеки OREGON_NR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2020 Сергей Зависляк
+// Copyright (c) 2021 Сергей Зависляк
 //
 // Данная лицензия разрешает лицам, получившим копию данного программного обеспечения и сопутствующей документации 
 // (в дальнейшем именуемыми «Программное Обеспечение»), безвозмездно использовать Программное Обеспечение без ограничений,
