@@ -45,6 +45,7 @@
 #define PULSE_SHORTEN_3   138
 
 #define THGN132   0x1D20 
+#define THN132   0xEC40
 #define THGR810   0xF824
 #define RTGN318   0xDCC3 
 #define THP	  0x5500
@@ -107,6 +108,7 @@ class Oregon_TM
     void calculateAndSetChecksum810();
     void calculateAndSetChecksum968();
     void calculateAndSetChecksum129();
+	void calculateAndSetChecksum132S();									
 
 
     void calculateAndSetChecksumTHP();

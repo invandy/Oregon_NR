@@ -367,6 +367,45 @@ void Oregon_TM::calculateAndSetChecksum132(void)
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Oregon_TM::calculateAndSetChecksum132S(void)
+{
+	byte CCIT_POLY = 0x07;
+	byte summ = 0x00;
+	byte crc = 0xD6;
+	SendBuffer[6] = SendBuffer[7] = 0x00;
+	byte cur_nible;
+	for(int i = 0; i < 6; i++)
+	{
+		cur_nible = (SendBuffer[i] & 0xF0) >> 4;
+		summ += cur_nible;
+		if (i !=3)
+		{
+			crc ^= cur_nible;
+			for(int j = 0; j < 4; j++)
+			if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+			else crc <<= 1;
+		}
+		cur_nible = SendBuffer[i] & 0x0F;
+		summ += cur_nible;
+		if (i !=2)
+		{
+			crc ^= cur_nible;
+			for(int j = 0; j < 4; j++)
+			if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+			else crc <<= 1;
+		}
+	}
+		for(int j = 0; j < 4; j++)
+		if (crc & 0x80) crc = (crc << 1) ^ CCIT_POLY;
+		else crc <<= 1;
+
+ SendBuffer[6] += (summ & 0x0F) << 4;
+ SendBuffer[6] += (summ & 0xF0) >> 4;
+ SendBuffer[7] += (crc & 0x0F) << 4;
+ SendBuffer[7] += (crc & 0xF0) >> 4;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Oregon_TM::calculateAndSetChecksum318()
 {
   byte CCIT_POLY = 0x07;
@@ -447,6 +486,8 @@ void Oregon_TM::SendPacket()
     calculateAndSetChecksum129();
   if (sens_type == THGN132)
     calculateAndSetChecksum132();
+  if (sens_type == THN132)
+    calculateAndSetChecksum132S();
   if (sens_type == RTGN318)
     calculateAndSetChecksum318();
   if (sens_type == THGR810)
@@ -512,6 +553,30 @@ void Oregon_TM::setChannel(byte channel)
       }
       protocol = 2;
     }
+	
+	    if (sens_type == THN132)
+    {
+      if (channel <= 1) 
+      {
+        channel_code = 0x10; 
+        setId(0xE3);
+        send_time = 39000;
+      }
+      if (channel == 2) 
+      {
+        channel_code = 0x20; 
+        setId(0xE3);
+        send_time = 41000;
+      }
+      if (channel == 3) 
+      {
+        channel_code = 0x40; 
+        setId(0xBB);
+        send_time = 43000;
+      }
+      protocol = 2;
+    }
+	
 
     if (sens_type == RTGN318 || sens_type == BTHGN129)
     {
@@ -696,13 +761,18 @@ void Oregon_TM::setTemperature(float temp)
 
 void Oregon_TM::setHumidity(byte hum)
   {
+	if (sens_type != THN132)
+    { 
       SendBuffer[6] = (hum/10);
       SendBuffer[6] += (hum - (SendBuffer[6] * 10)) << 4;
+	}
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setComfort(float temp, byte hum)
   {
+	if (sens_type != THN132)
+    { 
       if (hum > 70)
      {
       SendBuffer[7] = 0xC0;
@@ -720,6 +790,7 @@ void Oregon_TM::setComfort(float temp, byte hum)
      }
      else SendBuffer[7] = 0x00;
      return;
+	}
   }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
