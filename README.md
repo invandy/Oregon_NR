@@ -1,6 +1,4 @@
-
-
-This Arduino code is for receiving and transmitting data in Oregon Scientific RF protocol version 2.1 and 3.0. <br>
+This Arduino code is for receiving and transmitting data in Oregon Scientific RF protocol version 2.1 and 3.0. and Explore Scientific weather station protocol also<br>
 The folowed sensors data format are supported including calculation of CRC8:<br>
 <br>
 Receive and emulate:<br>
@@ -19,7 +17,8 @@ Receive only:<br>
 <li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
-<li>PCR800.</li>
+<li>PCR800,</li>
+<li>ST1004.</li>
 </dl>
 </list>
 <br><br>
@@ -27,13 +26,14 @@ Receive only:<br>
 Aslo supported self-developed sensors. Please contact author for additional infromation.<br>
 
 <br>
-Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0<br>
+Данная библиотека Ардуино предназначена для приема и передачи данных в формате беспроводного протокола Oregon Scientific v2.1 и v3.0 а также данных в формате метеостанций Explore Scientific<br>
 <br>
 Поддерживается формат следующих датчиков, включая рассчёт CRC8.<br>
 <br>
 Приём и эмуляция:<br>
 <dl>
 <li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
+<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTGN318 (RTGN130),</li>
 <li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)),</li>
 <li>BTHGN129,</li>
@@ -42,19 +42,16 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 <br>
 Только приём:<br>
 <dl>
-<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTHN318 (RTHR328N, RTHN129),</li>
 <li>THGN500,</li>
 <li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
-<li>PCR800.</li>
+<li>PCR800,</li>
+<li>ST1004.</li>
 </dl>
 <br>
-Также поддерживаются датчики собственной разработки (за дополнительной документацей обращаться к автору)<br><br>
-
-<br>
-Код приёмника протестирован на оригинальных датчиках THGN132N, THN132N и WGR800.<br>
+Код приёмника протестирован на оригинальных датчиках THGN132N, THN132N, WGR800 и ST1004.<br>
 <br>
 Код передатчика протетстирована на погодных станциях BAR206, BAR208 эмуляцией сигнала THGN132N<br>
 Для успешного приёма погодной станцией сигнала необходимо соблюдать следующие условия при передаче данных:<br>
@@ -130,5 +127,16 @@ br>
 <dl>
 <li>ДОбавлен эмулятор передатчиков BTHR968 и BTHGN129</li>
 <li>Исправлена ошибка при рассчёте давления для этих же датчиков</li>
+<li></li>
+</dl>
+21.03.25<br>
+<dl>
+<li>Добавлен эмулятор передатчика THN132 (thanks to karev-anton)</li>
+<li></li>
+</dl>
+21.08.31<br>
+<dl>
+<li>Добавлен приём пакетов от Explore Scientific ST1004 (beta)</li>
+<li>Исправлена ошибка при работе с длинными пакетами данных</li>
 <li></li>
 </dl>
