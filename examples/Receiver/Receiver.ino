@@ -43,7 +43,6 @@ void loop() {
     if (oregon.ver == 2) Serial.print("  ");
     if (oregon.ver == 3) Serial.print("3 ");
     if (oregon.ver == 11) Serial.print("E ");
-    if (oregon.ver == 12) Serial.print("E2");
     
     //Информация о восстановлени пакета
     if (oregon.restore_sign & 0x01) Serial.print("s"); //восстановлены одиночные такты
@@ -74,13 +73,11 @@ void loop() {
     oregon.sens_type == BTHGN129 ||
     oregon.sens_type == BTHR968 ||
     oregon.sens_type == ST1004 ||
-    oregon.sens_type == ST1005 ||
     oregon.sens_type == THGN500) && oregon.crc_c){
       Serial.print("\t");
       
       
       if (oregon.sens_type == ST1004) Serial.print("ST1004  ");
-      if (oregon.sens_type == ST1005) Serial.print("ST1005  ");
       if (oregon.sens_type == THGN132) Serial.print("THGN132N");
       if (oregon.sens_type == THGN500) Serial.print("THGN500 ");
       if (oregon.sens_type == THGR810) Serial.print("THGR810 ");
@@ -114,7 +111,6 @@ void loop() {
           oregon.sens_type == BTHR968 ||
           (oregon.sens_type & 0x0FFF) == RTGN318 ||
           oregon.sens_type == THGN500 || 
-          oregon.sens_type == ST1005 || 
           oregon.sens_type == ST1004) {
         Serial.print("HUM: ");
         Serial.print(oregon.sens_hmdty, 0);
@@ -128,8 +124,6 @@ void loop() {
       Serial.print(oregon.get_pressure(), 1);
       Serial.print("Hgmm ");
       }
-
-      if (oregon.sens_type == ST1005 && (oregon.packet[2] & 0x04)) Serial.print(" TX MODE ");
     }
 
   if (oregon.sens_type == WGR800 && oregon.crc_c){
