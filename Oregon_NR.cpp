@@ -1,5 +1,4 @@
 #include "Oregon_NR.h"
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This file is part of the Arduino OREGON_NR library.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +150,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   captured = 0;
   data_val = 0;
   data_val2 = 0;
-  receiver_dump = 0;
+ // receiver_dump = 1;
 
   ////////////////////////////////////////////////////////
   //Чтение данных с приёмника
@@ -166,94 +165,122 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   if (pulse_length != 0 && receive_status == FIND_PACKET)
   {
     //Если импульс пришёл слишком поздно для конкретной версии протокола, то это первый импульс
-    if ((pulse_marker - pre_marker) > (PER_LENGTH2 * 3 + LENGTH_TOLERANCE3) && ver == 2) start_pulse_cnt = 0;
-    if ((pulse_marker - pre_marker) > (PER_LENGTH3 * 6 + LENGTH_TOLERANCE3) && ver == 3) start_pulse_cnt = 0;
-    if ((pulse_marker - pre_marker) > (PER_LENGTH3 * 6 + LENGTH_TOLERANCE3) && ver == 11) start_pulse_cnt = 0;
+    if ((pulse_marker - pre_marker_2) > (PER_LENGTH2 * 3 + LENGTH_TOLERANCE)) pulse_cnt_2 = 0;
+    if ((pulse_marker - pre_marker_3) > (PER_LENGTH3 * 3 + LENGTH_TOLERANCE)) pulse_cnt_3 = 0;
+    if ((pulse_marker - pre_marker_es) > (PER_LENGTH3 * 7 + LENGTH_TOLERANCE)) pulse_cnt_es = 0;
+    if ((pulse_marker - pre_marker_es2) > (PER_LENGTH_ES2 * 19 + LENGTH_TOLERANCE)) pulse_cnt_es2 = 0;
 
 
-    //Найдена первый "правильный" импульс - определяем тип протокола
-    if (start_pulse_cnt == 0)
-    {
-      if (pulse_length < (PULSE_LENGTH2 + LENGTH_TOLERANCE2) && pulse_length > (PULSE_LENGTH2 -  LENGTH_TOLERANCE2) && catch2 )
+
+      //Найдена "правильный" импульс протокола OSV2
+#if ADD_SENS_SUPPORT == 1
+      if (pulse_length < (976 + LENGTH_TOLERANCE) && pulse_length > (976 -  LENGTH_TOLERANCE) && catch2 )
+#else
+      if (pulse_length < (885 + LENGTH_TOLERANCE) && pulse_length > (885 -  LENGTH_TOLERANCE) && catch2 )
+#endif
       {
-        start_pulse_cnt = 1;
-        pre_marker = pulse_marker;
-        ver = 2;
-      }
-
-      if (pulse_length < (PULSE_LENGTH3 + LENGTH_TOLERANCE3) && pulse_length > (PULSE_LENGTH3 -  LENGTH_TOLERANCE3) && (catch3 || catch_es) && packet_number == 0)
-      {
-        start_pulse_cnt = 1;
-        pre_marker = pulse_marker;
-        ver = 3;
-      }
-      return;
-    }
-
-    //Найдена следующий "правильный" импульс
-    else
-    {
-      //версии 2
-      if (pulse_length < (PULSE_LENGTH2 + LENGTH_TOLERANCE2) && pulse_length > (PULSE_LENGTH2 -  LENGTH_TOLERANCE2) && catch2 )
-      {
-
-        //Если длиныый импульс в правильном месте, то добавляем счётчик найденых стартовых импульсов
-        if ((pulse_marker - pre_marker) > (PER_LENGTH2 * 2 - LENGTH_TOLERANCE3) && (pulse_marker - pre_marker) < (PER_LENGTH2 * 2 + LENGTH_TOLERANCE3) && ver == 2)
+        if (pulse_cnt_2 == 0) 
         {
-          start_pulse_cnt++;
-          pre_marker = pulse_marker;
-          pulse2 = pulse_length;
-          if (start_pulse_cnt != CATCH_PULSES) return;
-          pulse_length = 0;
+          pulse_cnt_2 = 1;
+          pre_marker_2 = pulse_marker;
         }
-        //Следующий длиныый импульс находится в неправильном месте
-        //Назначаем его первым
-        else
+        else 
         {
-          start_pulse_cnt = 1;
-          pre_marker = pulse_marker;
-          ver = 2;
-          return;
+          if ((pulse_marker - pre_marker_2) > (976 * 2 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_2) < (976 * 2 + LENGTH_TOLERANCE)) 
+          {
+            pulse_cnt_2++; 
+            pre_marker_2 = pulse_marker;
+          }
+          else if ((pulse_marker - pre_marker_2) > (976 * 2 + LENGTH_TOLERANCE))
+
+          {
+            pulse_cnt_2 = 1;
+            pre_marker_2 = pulse_marker;
+          }
         }
       }
 
-      //версии 3
-      if (pulse_length < (PULSE_LENGTH3 + LENGTH_TOLERANCE3) && pulse_length > (PULSE_LENGTH3 -  LENGTH_TOLERANCE3) && (catch3 || catch_es) && packet_number == 0) {
-
-        //Если короткий импульс в правильном месте для OSV3, то добавляем счётчик найденых стартовых импульсов
-        if ((pulse_marker - pre_marker) > (PER_LENGTH3 * 2 - LENGTH_TOLERANCE3) && (pulse_marker - pre_marker) < (PER_LENGTH3 * 2 + LENGTH_TOLERANCE3) && (ver == 3 || ver == 11))
+    //Найдена "правильный" импульс протокола OSV3
+      if (pulse_length < (335 + LENGTH_TOLERANCE) && pulse_length > (335 -  LENGTH_TOLERANCE) && catch3) 
+      {
+        if (pulse_cnt_3 == 0) 
         {
-          //Если до этого были импульсы протокола ES, то что-то не так. Будем считает, что это первый импульс OSV3
-          if (ver == 11) start_pulse_cnt = 0;
-          ver = 3;
-          start_pulse_cnt++;
-          pre_marker = pulse_marker;
-          if (start_pulse_cnt != CATCH_PULSES) return;
-          pulse_length = 0;
+          pulse_cnt_3 = 1;
+          pre_marker_3 = pulse_marker;
         }
-
-        //Немного подолжёдм. Если короткий импульс в правильном месте для ES, то добавляем счётчик найденых стартовых импульсов и считаем, что протокол ES
-        if (
-          (  (pulse_marker - pre_marker) > (PER_LENGTH3 * 3 - LENGTH_TOLERANCE3) && (pulse_marker - pre_marker) < (PER_LENGTH3 * 3 + LENGTH_TOLERANCE3)
-             || (pulse_marker - pre_marker) > (PER_LENGTH3 * 5 - LENGTH_TOLERANCE3) && (pulse_marker - pre_marker) < (PER_LENGTH3 * 5 + LENGTH_TOLERANCE3))
-          && (ver == 3 || ver == 11))
+        else 
         {
-          ver = 11;
-          start_pulse_cnt++;
-          pre_marker = pulse_marker;
-          pulse2 = pulse_length;
-          if (start_pulse_cnt != CATCH_PULSES) return;
-          pulse_length = 0;
-
+          if ((pulse_marker - pre_marker_3) > (488 * 2 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_3) < (488 * 2 + LENGTH_TOLERANCE)) 
+          {
+            pulse_cnt_3++; 
+            pre_marker_3 = pulse_marker;
+          }
+          else if ((pulse_marker - pre_marker_3) > (488 * 2 + LENGTH_TOLERANCE)) 
+          {
+            pulse_cnt_3 = 1;
+            pre_marker_3 = pulse_marker;
+          }
         }
-        //Следующий короткий импульс очень поздно пришёл
-        //Назначаем его первым для версии OSV3
-        if (pulse_length != 0)
+      }
+
+    //Найдена "правильный" импульс протокола ES
+    // ловим последовательность \518\- 1464 или 2440
+    // И отсутпаем на 976мс
+
+      if (pulse_length < (518 + LENGTH_TOLERANCE) && pulse_length > (518 -  LENGTH_TOLERANCE) && catch_es) 
+      {
+        if (pulse_cnt_es == 0) 
         {
-          start_pulse_cnt = 1;
-          pre_marker = pulse_marker;
-          ver = 3;
-          return;
+          pulse_cnt_es = 1;
+          pre_marker_es = pulse_marker;
+        }
+        else 
+        {
+          if( 
+            ((pulse_marker - pre_marker_es) > (488 * 3 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_es) < (488 * 3 + LENGTH_TOLERANCE)) ||
+            ((pulse_marker - pre_marker_es) > (488 * 5 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_es) < (488 * 5 + LENGTH_TOLERANCE))
+            )
+          {
+            pulse_cnt_es++; 
+            pre_marker_es = pulse_marker;
+          }
+          else
+          {
+            pulse_cnt_es = 1;
+            pre_marker_es = pulse_marker;
+          }
+        }
+      }
+
+    //Найдена "правильный" импульс протокола ES2
+    // ловим последовательность \680\- 9740 -\780\ - 2840 - \710\
+    // И отсутпаем на 9680мс
+
+      if (pulse_length < (780 + LENGTH_TOLERANCE) && pulse_length > (680 -  LENGTH_TOLERANCE) && catch_es2) 
+      {
+        if (pulse_cnt_es2 == 0 && pulse_length < (680 + LENGTH_TOLERANCE) && pulse_length > (680 -  LENGTH_TOLERANCE)) 
+        {
+          pulse_cnt_es2 = 1;
+          pre_marker_es2 = pulse_marker;
+        }
+        else 
+        {
+          if( 
+            (pulse_cnt_es2 == 1 && (pulse_marker - pre_marker_es2) > (9740 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_es2) < (9740 + LENGTH_TOLERANCE) && pulse_length < (780 + LENGTH_TOLERANCE) && pulse_length > (780 -  LENGTH_TOLERANCE)) || 
+            (pulse_cnt_es2 == 2 && (pulse_marker - pre_marker_es2) > (2860 - LENGTH_TOLERANCE) && (pulse_marker - pre_marker_es2) < (2860 + LENGTH_TOLERANCE) && pulse_length < (710 + LENGTH_TOLERANCE) && pulse_length > (710 -  LENGTH_TOLERANCE)) 
+            )
+        {
+           pulse_cnt_es2++; 
+           pre_marker_es2 = pulse_marker;
+        }
+//          else if (
+//                  ((pulse_cnt_es2 == 1 && (pulse_marker - pre_marker_es2) > (9690 + 90))) ||
+//                  ((pulse_cnt_es2 == 2 && (pulse_marker - pre_marker_es2) > (2820 + 90)))
+//                  )
+else
+        {
+           pulse_cnt_es2 = 1;
+           pre_marker_es2 = pulse_marker;
         }
       }
     }
@@ -262,24 +289,71 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   //////////////////////////////////////////////////////////////////////
   //Если Найдено нужное количество правильных импульсов в нужных местах, то возможно это пакет. Начинаем СБОР ДАННЫХ
 
-  if (start_pulse_cnt == CATCH_PULSES && receive_status == FIND_PACKET)
+  if (pulse_cnt_2 == CATCH_PULSES && receive_status == FIND_PACKET)
   {
-    start_pulse_cnt = 0;
-
     if (packet_number == 0)
     {
+      ver = 2;
+      pre_marker = pre_marker_2;
       read_tacts = collect(collect_data);
       first_packet_end = millis();
       packet_number = 1;
+
     }
     else
     {
+      ver = 2;
+      pre_marker = pre_marker_2;
       read_tacts2 = collect(collect_data2);
       packet_number = 2;
       receive_status = ANALIZE_PACKETS;
+
     }
   }
 
+
+  if (pulse_cnt_3 == CATCH_PULSES && receive_status == FIND_PACKET)
+  {
+    ver = 3;
+    pre_marker = pre_marker_3;
+    read_tacts = collect(collect_data);
+    first_packet_end = millis();
+    packet_number = 1;
+
+
+  }
+
+  if (pulse_cnt_es == CATCH_PULSES && receive_status == FIND_PACKET)
+  {
+    ver = 11;
+    pre_marker = pre_marker_es;
+    read_tacts = collect(collect_data);
+    first_packet_end = millis();
+    packet_number = 1;
+
+  }
+
+  if (pulse_cnt_es2 == 3  && receive_status == FIND_PACKET)
+  {
+   if (packet_number == 0)
+    {
+      ver = 12;
+      pre_marker = pre_marker_es2;
+      read_tacts = collect(collect_data);
+      first_packet_end = millis();
+      packet_number = 1;
+
+    }
+    else
+    {
+      ver = 12;
+      pre_marker = pre_marker_es2;
+      read_tacts2 = collect(collect_data2);
+      packet_number = 2;
+      receive_status = ANALIZE_PACKETS;
+
+    }
+  }
 
   //*************************************************************************************
   /////////////////////////////////////////////////////////////////////
@@ -287,18 +361,20 @@ void Oregon_NR::capture(bool DEBUG_INFO)
   // Не ждём второго, а переходм в режим анализа
   // Также не ждём второго пакета если отключён режим сращивания пакетов
   if (packet_number == 1 && (millis() - first_packet_end) > 200) receive_status = ANALIZE_PACKETS;
-  if (packet_number == 1 && (!is_assemble || ver != 2 )) receive_status = ANALIZE_PACKETS;
+  if (packet_number == 1 && (!is_assemble || ver != 2 || ver != 12 )) receive_status = ANALIZE_PACKETS;
 
 
   //////////////////////////////////////////////////////////////////////
   // Анализ данных////////////////////////////////////////////////////////
   if  (receive_status == ANALIZE_PACKETS)
   {
+
     //////////////////////////////////////////////////////////////////////
     //Если пришёл тольок кусок посылки, то не стоит и обрабатывать
     if ((ver == 2 && read_tacts < 136 && read_tacts2 < 136)
         || (ver == 3 && read_tacts < 80)
-        || (ver == 11 && read_tacts < 80))
+        || (ver == 11 && read_tacts < 80)
+        || (ver == 12 && read_tacts < 80))
     {
       receive_status = FIND_PACKET;
       start_pulse_cnt = 0;
@@ -365,11 +441,13 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       if (ver == 2) Serial.print("OSV2 ");
       if (ver == 3) Serial.print("OSV3 ");
       if (ver == 11) Serial.print("ES   ");
+      if (ver == 12) Serial.print("ES2  ");
+
       if (packet_number == 2)   Serial.print("1)     ");
       if (packet_number == 1)   Serial.print("RESULT ");
       byte* bt = collect_data;
       for (int i = 0; i < no_read_bits; i++) {
-        if (((ver == 3)  && i <= read_tacts) || (ver == 2 && i <= read_tacts / 2) || (ver == 11 && i <= read_tacts / 2)) {
+        if (((ver == 3)  && i <= read_tacts) || (ver == 2 && i <= read_tacts / 2) || ((ver == 11 || ver == 12) && i <= read_tacts / 2)) {
           if (*bt > 128 + 1) Serial.print('I');
           if (*bt < 128 - 1) Serial.print('O');
           if (*bt == 128 + 1) Serial.print('i');
@@ -412,6 +490,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
         if (ver == 2) Serial.print("OSV2 ");
         if (ver == 3) Serial.print("OSV3 ");
         if (ver == 11) Serial.print("ES   ");
+        if (ver == 12) Serial.print("ES2  ");
         Serial.print("2)     ");
         byte* bt = collect_data2;
         for (int i = 0; i < no_read_bits; i++) {
@@ -488,6 +567,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       if (ver == 2) Serial.print("OSV2 ");
       if (ver == 3) Serial.print("OSV3 ");
       if (ver == 11) Serial.print("ES   ");
+      if (ver == 12) Serial.print("ES2  ");
       Serial.print("RESULT ");
       byte* rdt = result_data;
       for (int bt = 0; bt < no_read_bits; bt++) {
@@ -522,8 +602,10 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       if (ver != 11)
       {
         sens_type = get_sensor(packet); //Определяем тип пакета по типу датчика
+	if (ver == 12) sens_type = ST1005;
         restore_data(packet, sens_type); // Восстанавливаем данные по типу датчика
-        crc_c = check_CRC(packet, sens_type); // Проверяем CRC, если оно верно, то все сомнительные биты делаем уверенными
+        crc_c = check_CRC(packet, sens_type, valid_p); // Проверяем CRC
+
       }
       //Если не все байты определены уверенно, нельзя считать, что пакет корректный
       //Захват пакета происходит тольок в случае, если найдена стартовая последовательность (нибл синхронизации)
@@ -563,6 +645,9 @@ void Oregon_NR::capture(bool DEBUG_INFO)
 
     }
 
+
+
+
 #if ADD_SENS_SUPPORT == 1
     sens_tmp2 = 404;
     sens_CO = 255;
@@ -591,7 +676,7 @@ void Oregon_NR::capture(bool DEBUG_INFO)
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Расшифровка датчика Explore Scientific
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    if (same_found)
+    if (same_found && ver == 11)
     {
       crc_c = 1; //вместо CRC найдено как минимум два пакета
       sens_type = ST1004;
@@ -601,6 +686,19 @@ void Oregon_NR::capture(bool DEBUG_INFO)
       if (packet[pkt_pos + 3] < 0x08) sens_tmp = (float)(((packet[pkt_pos + 3] & 0x01) << 8) + (packet[pkt_pos + 4] << 4) + packet[pkt_pos + 5]) / 10;
       else sens_tmp = -(float)(0x1FF - (((packet[pkt_pos + 3] & 0x01) << 8) + (packet[pkt_pos + 4] << 4) + packet[pkt_pos + 5])) / 10;
     }
+
+    if ( ver == 12 && crc_c)
+    {
+      sens_type = ST1005;
+      sens_id = (packet[0] << 4) + packet[1];
+      sens_chnl = (packet[2] & 0x03) + 0x01; //Бит 0x07 высавляется при нажатии кнопки TX
+      sens_battery = !(packet[2] & 0x08);
+      sens_hmdty = ((packet[6] << 4) + packet[7]) >> 1;
+      if (packet[3] < 0x08) sens_tmp = (float)(((packet[3] & 0x01) << 8) + (packet[4] << 4) + packet[5]) / 10;
+      else sens_tmp = -(float)(0x1FF - (((packet[3] & 0x01) << 8) + (packet[4] << 4) + packet[5])) / 10;
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //Расшифровка датчиков Oregon Scientific
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +901,7 @@ void Oregon_NR::get_tacts(byte* cdptr, int bitsize) {
     {
       if ((((*cdp) >> 4) + (*cdp & 0x0F)) < 5)  decode_tacts[bt] = 0;
       if (((((((*cdp) >> 4) + (*cdp & 0x0F)) > 4) && ((((*cdp) >> 4) + (*cdp & 0x0F)) < 10)) && (ver == 2 || ver == 3)) ||
-          ((((((*cdp) >> 4) + (*cdp & 0x0F)) > 4) && ((((*cdp) >> 4) + (*cdp & 0x0F)) < 12)) && (ver == 11))
+          ((((((*cdp) >> 4) + (*cdp & 0x0F)) > 4) && ((((*cdp) >> 4) + (*cdp & 0x0F)) < 12)) && (ver == 11 || ver == 12))
          )
 
         if (((((*cdp) >> 4) + (*cdp & 0x0F)) > 4) && ((((*cdp) >> 4) + (*cdp & 0x0F)) < 11))
@@ -892,6 +990,23 @@ void Oregon_NR::get_tacts(byte* cdptr, int bitsize) {
         decode_tacts[bt] = 0;
       }
     }
+
+    if (ver == 12)
+    {
+      //Допустимые комбинации
+      //10 00 10
+      //10 00 00 01
+      //01 00 01 
+      //01 00 00 00 10 
+
+      //11 - недопустим
+      if (decode_tacts[bt] == 1) decode_tacts[bt] = 2;
+      //X1 X1- недопустим
+      // if ((decode_tacts[bt - 1]  == 4  || decode_tacts[bt - 1]  == 1) && (decode_tacts[bt] == 1 || decode_tacts[bt] == 4)) decode_tacts[bt] = 2;
+      //1X 1X- недопустим
+
+    }
+
   }
 
   //Восстановление одиночных тактов
@@ -928,6 +1043,45 @@ void Oregon_NR::get_tacts(byte* cdptr, int bitsize) {
       }
     }
   }
+
+  //Восстановление одиночных тактов
+  for (int bt = 1; bt < (bitsize - 1); bt++)
+  {
+    if (ver == 12)
+    {
+      //10 XX -> 10 00
+      //01 XX -> 01 00  
+      //10 00 XX 00 -> 10 00 10 00
+      //01 00 00 XX 10 -> 01 00 00 00 10
+      if (decode_tacts[bt] == 2)
+      {
+      //10 XX -> 10 00
+      //01 XX -> 01 00  
+        if (decode_tacts[bt - 1]  == 3 || decode_tacts[bt - 1]  == 4 ) 
+        {
+          decode_tacts[bt] = 0;
+          restore_sign ^= 2;
+        }
+      //10 00 XX 00 -> 10 00 10 00
+        if (decode_tacts[bt - 2]  == 3 && decode_tacts[bt - 1]  == 0 &&  decode_tacts[bt + 1]  == 0 ) 
+        {
+          decode_tacts[bt] = 3;
+          restore_sign ^= 2;
+        }
+      //01 00 00 XX 10 -> 01 00 00 00 10
+        if (decode_tacts[bt - 3]  == 4 && decode_tacts[bt - 2]  == 0  && decode_tacts[bt - 1]  == 0 &&  decode_tacts[bt + 1]  == 3 ) 
+        {
+          decode_tacts[bt] = 0;
+          restore_sign ^= 2;
+        }
+      }
+    }
+  }
+
+
+
+
+
   //восстановление потерянных полутактов
   cdp = cdptr;
   for (int bt = 1 ; bt < (bitsize - 1); bt++) {
@@ -1213,6 +1367,76 @@ int Oregon_NR::get_data(int btt_in, byte p_ver, byte* cdptr, int noftacts) { //b
     return packet_validity; //возвращаем кол-во достоверных байтов
   }
 
+  //расшифровка протокола ES2
+  if (p_ver == 12)
+  {
+    //На начало массива
+    cdp = cdptr;
+    *cdp = 128;
+
+    btt = 0; //Сдвиг не проверяется всилу отсутствия преамбулы??
+    byte crnt_pos_plus = 0;
+
+    for (int bt = 1 ; bt < no_read_bits; bt++)
+    {
+      crnt_pos_plus = 0;
+      if (decode_tacts[ptr_pos] == 3) //Если такт 10
+      {
+        //Определение единицы
+        //10 00 00 01
+        if (decode_tacts[ptr_pos - btt + 1] == 0 && decode_tacts[ptr_pos - btt + 2] == 0 && decode_tacts[ptr_pos - btt + 3] == 4) 
+       {
+         *cdp += 2;
+         crnt_pos_plus = 1;
+       }
+        //Определение нуля
+        //10 00 10
+        if (decode_tacts[ptr_pos - btt + 1] == 0 && decode_tacts[ptr_pos - btt + 2] == 3)
+        {
+          *cdp -= 2;
+
+        }
+      }
+
+      if (decode_tacts[ptr_pos - btt] == 4) //Если такт 01
+      {
+        //Определение единицы
+        //01 00 00 00 10
+        if (decode_tacts[ptr_pos - btt + 1] == 0 && decode_tacts[ptr_pos - btt + 2] == 0 && decode_tacts[ptr_pos - btt + 3] == 0 &&  decode_tacts[ptr_pos - btt + 4] == 3)
+        {
+          *cdp += 2;
+         crnt_pos_plus = 2;
+        }
+        //Определение нуля
+        //01 00 01
+        if (decode_tacts[ptr_pos - btt + 1] == 0 && decode_tacts[ptr_pos - btt + 2] == 4)
+        {
+          *cdp -= 2;
+        }
+      }
+      //Сдвигаемся 
+	crnt_pos_plus += 2;
+        ptr_pos += crnt_pos_plus;
+
+
+      //Подсчитываем кол-во достоверных бит в пакете
+      if (*cdp > (128))
+      {
+        packet_validity += *cdp - 128;
+//        ptr_pos += 1;
+      }
+      if (*cdp < (128))
+      {
+        packet_validity += 128 - *cdp;
+
+      }
+      if (ptr_pos > noftacts) break;
+      cdp++;
+      yield();
+    }
+    return packet_validity; //возвращаем кол-во достоверных байтов
+  }
+
   return 0; //Нет найденных данных
 
 }
@@ -1254,32 +1478,68 @@ int Oregon_NR::collect(byte* cdptr) {
     cdp++;
   }
 
+  if (ver == 12)
+  {
+    pre_marker += 9680; //
+//    *cdp = 0x80;       //
+//    cdp++;
+  }
+
   //////////////////////////////////////////////////////
   //Начинаем читать данные в память
   // Максимальная длина поасылка для v3 - 104БИТА, THN132 - 76 бИТ + как минимум 3 бита 111, которые мы уже нашли
   int bt;
+  //Обычно квант считывания 61мкс
+  byte quant = 61;
+  //для датчика ST1005 частота другая
+  if (ver == 12) quant = 85;
 
-  for (bt = 0 ; bt < no_read_tacts; bt++) {
+  for (bt = 0 ; bt < no_read_tacts; bt++) 
+  {
     *cdp = 0;
-    for (byte ckl = 0; ckl < 8; ckl++) {            // Читаем 8 раз за полутакт
-      pre_marker += 61;
+    for (byte ckl = 0; ckl < 8; ckl++) 
+    {            // Читаем 8 раз за полутакт
+      pre_marker += quant;
       while (micros() < pre_marker);
       if (digitalRead(RECEIVER_PIN)) *cdp += 0x10;  // Измерения запиываем в старший полубайт
     }
-    for (byte ckl = 0; ckl < 8; ckl++) {
-      pre_marker += 61;
+    for (byte ckl = 0; ckl < 8; ckl++) 
+    {
+      pre_marker += quant;
       while (micros() < pre_marker);
       if (digitalRead(RECEIVER_PIN)) *cdp += 1;     // В следующий полутакт измерения запиываем в младший  полубайт. Это экономит память.
 
     }
     bt2++;
+    //коррекция частоты сбора данных
     // Идеальный период 976.5625
     //  Каждые 7 тактов добавлять 4мкс для выравнивания периода с 976мкс до 976.5714мкс + 0.009%
-    if (bt2 == 7)
+    if (bt2 == 7 && ver != 12)
     {
       pre_marker += (4 + timing_correction) ;
       bt2 = 0;
     }
+
+    //ДЛя ST1005 другая коррекция частоты, да и сама тактовая частота плавает в зависимости от температуры и напряжения
+    if (ver == 12)
+    {
+      if (bt2 == 3)
+      {
+        pre_marker += (5 + timing_correction) ;
+        bt2 = 0;
+      }
+    if (
+       (((*cdp & 0xF0) == 0x20  || (*cdp & 0xF0) == 0x30) && (*(cdp - 1) & 0x0F) == 0x06) ||
+        (*cdp  == 0x62 || *cdp  == 0x63) && (*(cdp - 1) == 0x00)
+       )
+       pre_marker += 85;
+  if (
+       (((*cdp & 0x0F) == 0x02 || (*cdp & 0x0F) == 0x03) && (*(cdp - 1) & 0xF0) == 0x60) ||
+        (*cdp  == 0x26 || *cdp  == 0x36) && (*(cdp - 1) == 0x00)
+       )
+       pre_marker -= 85;
+    }
+
     //Нельзя отдавать процессор вов ремя сбора данных!!!
     //yield();
     /////////////////////////////////////////////
@@ -1289,6 +1549,7 @@ int Oregon_NR::collect(byte* cdptr) {
 
     if ((*cdp & 0xf0) < 0x30 && (*cdp & 0x0f) < 0x05)  nulls_found++;
     else nulls_found = 0;
+
     cdp++;
 
     /////////////////////////////////////////////
@@ -1300,6 +1561,7 @@ int Oregon_NR::collect(byte* cdptr) {
     if ((ver == 2 || ver == 3) && nulls_found > empty_space ) return bt;
     // Для протокола ES это может быть пауза между посылками там пробел в 4 такта
     if (ver == 11 && nulls_found > 6 ) return bt;
+    if (ver == 12 && nulls_found > 5 ) return bt;
 
     /////////////////////////////////////////////
     //Ждём прихода времени следующего полутакта
@@ -1472,13 +1734,15 @@ int Oregon_NR::get_synchro_pos(byte* code, int p_ver) {
         cp++;
       }
     }
-
-
-
-
     if (!syn_found) return 0xFFFF; //Ничего не найдено
     return (byte) i;
   }
+
+  if (p_ver == 12 )
+  {
+   return 1;
+  }
+
 
 }
 
@@ -1522,22 +1786,22 @@ int Oregon_NR::get_info_data(byte* code, byte syn_pos , byte* result, byte* vali
     int multipl;
     switch (ii) {
       case 0: {
-          if (ver == 11) multipl = 0x08;
+          if (ver == 11 || ver == 12 ) multipl = 0x08;
           else  multipl = 0x01;
           break;
         }
       case 1: {
-          if (ver == 11) multipl = 0x04;
+          if (ver == 11 || ver == 12) multipl = 0x04;
           else  multipl = 0x02;
           break;
         }
       case 2: {
-          if (ver == 11) multipl = 0x02;
+          if (ver == 11 || ver == 12) multipl = 0x02;
           else  multipl = 0x04;
           break;
         }
       case 3: {
-          if (ver == 11) multipl = 0x01;
+          if (ver == 11 || ver == 12) multipl = 0x01;
           else  multipl = 0x08;
           break;
         }
@@ -1832,7 +2096,7 @@ float Oregon_NR::get_rain_rate()
 //Проверка CRC
 //oregon_data - указатель на кодовую посылку
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type) {
+bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type, byte* valid_data) {
 
   if (sens_type == THN132)
   {
@@ -1884,7 +2148,6 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type) {
     return check_oregon_crcsum(oregon_data, 0X07, 0X0, 17, true) ;
   }
 
-
   if (sens_type == WGR800)
   {
     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 21, true) ;
@@ -1899,6 +2162,18 @@ bool Oregon_NR::check_CRC(byte* oregon_data, word sens_type) {
   {
     return check_oregon_crcsum(oregon_data, 0X07, 0X00, 16, true) ;
   }
+
+  if (sens_type == ST1005)
+  {
+    if (valid_data[0] != 0x0F || valid_data[1] != 0x0F || valid_data[6] != 0x0F || valid_data[7] != 0x0F) return 0;
+    word cksum = (oregon_data[0] + oregon_data[1] + oregon_data[2]  + oregon_data[3] + oregon_data[4] + oregon_data[5] + oregon_data[6] + oregon_data[7]) ;
+    cksum -= (cksum & 0x20) >> 5;
+    cksum &= 0x1F;
+    word rec_sum = (oregon_data[8] << 1) + ((oregon_data[9] & 0x08) >> 3);
+    if (cksum == rec_sum) valid_data[8] = 0x0F;
+    return cksum == rec_sum;
+  }
+
 
 #ifdef ADD_SENS_SUPPORT == 1
 
