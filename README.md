@@ -18,8 +18,7 @@ Receive only:<br>
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800,</li>
-<li>ST1004,</li>
-<li>ST1005.</li>
+<li>ST1004.</li>
 </dl>
 </list>
 <br><br>
@@ -49,8 +48,7 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800,</li>
-<li>ST1004,</li>
-<li>ST1005.</li>
+<li>ST1004.</li>
 </dl>
 <br>
 Код приёмника протестирован на оригинальных датчиках THGN132N, THN132N, WGR800 и ST1004.<br>
@@ -140,11 +138,5 @@ br>
 <dl>
 <li>Добавлен приём пакетов от Explore Scientific ST1004 (beta)</li>
 <li>Исправлена ошибка при работе с длинными пакетами данных</li>
-<li></li>
-</dl>
-21.09.14<br>
-<dl>
-<li>Добавлен приём пакетов от Explore Scientific ST1005 (beta)</li>
-<li>Изменён метод поиска пакетов в эфире</li>
 <li></li>
 </dl>
