@@ -59,7 +59,8 @@
 #define PCR800	  0x2914 // счётчик осадков
 
 // Распознавание пакетов от следующих датчиков Explore Scientific:
-#define ST1004	  0x00B5 // Температура, влажность, 3 канала, 57, 68, 79c
+#define ST1004	  0x00B5 // Температура, влажность, 3 канала, 
+#define ST1005	  0x00B6 // Температура, влажность, 3 канала, 
 
 //
 // Датчики собственной разработки:
@@ -77,19 +78,12 @@
 // Этими параметрами можно поиграть для настройки наилучшего приёма
 
 
-#define PER_LENGTH2   976	// Период передачи данных. Для v2 и v3 976,56мкс (1024Гц)
-#define PER_LENGTH3   488
+#define PER_LENGTH2      976	// Период передачи данных. Для v2 и v3 976,56мкс (1024Гц)
+#define PER_LENGTH3      488
+#define PER_LENGTH_ES2   680
 
-//Длина импульса преамбулы
-//OSV2: 885.0мс = 976.6 - 91.6 = 976.6 - 3 * 30.5
-//OSV3: 335.7мс = 488.3 - 152.6 = 488.3 - 5 * 30.5
-//ES:   518.8мс = 488.3 + 30.5
-#define PULSE_LENGTH2 930	// Средняя Длина импульса для OSV2 (оригинальных 885 и эмуляторов 976.6)
-#define PULSE_LENGTH3 426       // Средняя Длина импульса для OSV3 (335.7) и ES (518.8)
+#define LENGTH_TOLERANCE 100   // Свыше разбросов длины импульсов нужно ещё около 60-90мс для запаса по уровню сигнала
 
-
-#define LENGTH_TOLERANCE2 140   // Свыше разбросов длины импульсов нужно ещё около 60-90мс для запаса по уровню сигнала
-#define LENGTH_TOLERANCE3 180   // Свыше разбросов длины импульсов нужно ещё около 60-90мс для запаса по уровню сигнала
 
 #define CATCH_PULSES 3		// Сколько искать правильных импульсов для начала захвата. Рекомендовано 2 - 4. 
 // Больше - можно не поймать пакет в условиях сильных шумов
@@ -117,8 +111,6 @@
 // Максимальная длина пакета в такта
 // v2 - 96 * 2 = 192
 // v3 - 116 = 116
-
-
 
 
 #define FIND_PACKET   1
@@ -158,6 +150,7 @@ class Oregon_NR
     byte* valid_p;  //Validity mask - маска уверенного распознавания битов
     byte packets_received = 0;    //Number of received packets in block (0...2)
     byte received_CRC;            //Calculated СRC
+    byte es2_bit[3];
 
     Oregon_NR(byte, byte);          //Конструктор. Параметры:
     Oregon_NR(byte, byte, byte, bool);    //(вывод приёмника, номер прерывания, вывод светодиода, pull up)
@@ -172,7 +165,8 @@ class Oregon_NR
     //Параметр определяется уровнем сигнала и скоростью АРУ приёмника.
     //Чем они лучше, тем меньше число. НО меньше двух не рекомендуется
     //В сатрой версии было 5
-    bool catch2 = 1, catch3 = 1, catch_es = 1;  //какие версии протокола принимать
+    bool catch2 = 1, catch3 = 1, catch_es = 1, catch_es2 = 1;  //какие версии протокола принимать
+
     int timing_correction = 0;   //Коррекция частоты приёма (от -10 до +10)
     byte decode_method = 3;      // Метод декодирования тактов
     //1 - традиционный
@@ -255,9 +249,14 @@ class Oregon_NR
 
     byte receive_status = FIND_PACKET;
     byte start_pulse_cnt = 0;
+    byte pulse_cnt_2 = 0;
+    byte pulse_cnt_3 = 0;
+    byte pulse_cnt_es = 0;
+    byte pulse_cnt_es2 = 0;
+
     unsigned long pulse_length, timer_marklong;
     unsigned long pulse_marker, right_pulse_marker;
-    unsigned long pre_marker; // Для хранения временных меток преамбулы при захвате пакета
+    unsigned long pre_marker = 0, pre_marker_2 = 0, pre_marker_3 = 0, pre_marker_es = 0, pre_marker_es2 = 0; // Для хранения временных меток преамбулы при захвате пакета
     unsigned long first_packet_end;
     int data_val, data_val2;        // Качество пакетов
     int synchro_pos, synchro_pos2; // Позиции синхрониблов в записи
@@ -269,7 +268,7 @@ class Oregon_NR
     float get_gas_temperature_out(byte* gas_data);
     byte get_gas_channel(byte* gas_data);
     void restore_data(byte* oregon_data, word sensor_type);
-    bool check_CRC(byte* oregon_data, word sensor_type);
+    bool check_CRC(byte*, word, byte*);
     bool check_own_crcsum(byte* , byte);
     byte get_id(byte* oregon_data);
     float get_humidity(byte* oregon_data);
