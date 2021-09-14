@@ -18,7 +18,8 @@ Receive only:<br>
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800,</li>
-<li>ST1004.</li>
+<li>ST1004,</li>
+<li>ST1005.</li>
 </dl>
 </list>
 <br><br>
@@ -33,7 +34,6 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 Приём и эмуляция:<br>
 <dl>
 <li>THGN132N (THGN122N, THGN123N, THGR122N, THGR228N, THGR238N, THGR268),</li>
-<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTGN318 (RTGN130),</li>
 <li>THGR810 (THGN800, THGN801, THGR800, THWR800, THGR221(?), THGR511(?)),</li>
 <li>BTHGN129,</li>
@@ -42,13 +42,15 @@ Aslo supported self-developed sensors. Please contact author for additional infr
 <br>
 Только приём:<br>
 <dl>
+<li>THN132N (THR238N, THRN122, THN122, THWR288N, THR268),</li>
 <li>RTHN318 (RTHR328N, RTHN129),</li>
 <li>THGN500,</li>
 <li>THN800,</li>
 <li>WGR800,</li>
 <li>UVN800,</li>
 <li>PCR800,</li>
-<li>ST1004.</li>
+<li>ST1004,</li>
+<li>ST1005.</li>
 </dl>
 <br>
 Код приёмника протестирован на оригинальных датчиках THGN132N, THN132N, WGR800 и ST1004.<br>
@@ -129,14 +131,15 @@ br>
 <li>Исправлена ошибка при рассчёте давления для этих же датчиков</li>
 <li></li>
 </dl>
-21.03.25<br>
-<dl>
-<li>Добавлен эмулятор передатчика THN132 (thanks to karev-anton)</li>
-<li></li>
-</dl>
 21.08.31<br>
 <dl>
-<li>Добавлен приём пакетов от Explore Scientific ST1004 (beta)</li>
+<li>Добавлена поддержка датчика Explore Scientific ST1004</li>
 <li>Исправлена ошибка при работе с длинными пакетами данных</li>
+<li></li>
+</dl>
+21.09.14<br>
+<dl>
+<li>Добавлена поддержка датчика Explore Scientific ST1005</li>
+<li>Изменён метод поиска пакетов в эфире</li>
 <li></li>
 </dl>
