@@ -50,7 +50,10 @@ Oregon_TM::Oregon_TM(byte tr_pin, int buf_size)
   TX_PIN = tr_pin;
   pinMode(TX_PIN, OUTPUT);
   digitalWrite(TX_PIN, LOW);
-
+}
+Oregon_TM::~Oregon_TM()
+{
+  delete SendBuffer;
 }
 
 Oregon_TM::Oregon_TM(byte tr_pin)

@@ -73,6 +73,7 @@ class Oregon_TM
     Oregon_TM(byte, int);
     Oregon_TM(byte);
     Oregon_TM();
+    ~Oregon_TM();
     void setType(word);
     void setChannel( byte);
     void setId(byte);
