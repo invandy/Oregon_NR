@@ -695,20 +695,16 @@ void Oregon_TM::setId(byte ID)
 void Oregon_TM::setBatteryFlag(bool level)
 {
   SendBuffer[3] &= 0xFB;
-  if (level)
-    SendBuffer[3] |= 0x04;
+  if (level) SendBuffer[3] |= 0x04;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setStartCount(byte startcount)
 {
   SendBuffer[3] &= 0xF4;
-  if (startcount == 8)
-    SendBuffer[3] |= 0x08;
-  if (startcount == 2)
-    SendBuffer[3] |= 0x02;
-  if (startcount == 1)
-    SendBuffer[3] |= 0x01;
+  if (startcount == 8) SendBuffer[3] |= 0x08;
+  if (startcount == 2) SendBuffer[3] |= 0x02;
+  if (startcount == 1) SendBuffer[3] |= 0x01;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
