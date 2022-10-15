@@ -695,31 +695,35 @@ void Oregon_TM::setId(byte ID)
 void Oregon_TM::setBatteryFlag(bool level)
 {
   SendBuffer[3] &= 0xFB;
-  if (level) SendBuffer[3] |= 0x04;
+  if (level)
+    SendBuffer[3] |= 0x04;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setStartCount(byte startcount)
 {
   SendBuffer[3] &= 0xF4;
-  if (startcount == 8) SendBuffer[3] |= 0x08;
-  if (startcount == 2) SendBuffer[3] |= 0x02;
-  if (startcount == 1) SendBuffer[3] |= 0x01;
+  if (startcount == 8)
+    SendBuffer[3] |= 0x08;
+  if (startcount == 2)
+    SendBuffer[3] |= 0x02;
+  if (startcount == 1)
+    SendBuffer[3] |= 0x01;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setPressure(float mm_hg_pressure)
 {
+  byte pressure;
+  
   //Ограничения датчика по даташиту
-  word pressure =  (word)(mm_hg_pressure / 0.75);
-  if (mm_hg_pressure < 450) pressure = 600;
-  if (mm_hg_pressure > 790) pressure = 1054;
+  // if (mm_hg_pressure < 450) pressure = 600;
+  // if (mm_hg_pressure > 790) pressure = 1054;
 
   if (sens_type == BTHR968)
   {
-    pressure -=  600;
+    pressure = (byte)(mm_hg_pressure-856);
     SendBuffer[7] &= 0xF0;
     SendBuffer[7] += pressure & 0x0F;
     SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
@@ -727,12 +731,13 @@ void Oregon_TM::setPressure(float mm_hg_pressure)
 
   if (sens_type == BTHGN129)
   {
-    pressure -=  545;
+    pressure = (byte)(mm_hg_pressure-795);
     SendBuffer[7] &= 0xF0;
     SendBuffer[7] += pressure & 0x0F;
     SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
   }
 
+  // prediction on nibble 18
   if (mm_hg_pressure < 1000)
   {
     // rainy
