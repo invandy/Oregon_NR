@@ -50,7 +50,10 @@ Oregon_TM::Oregon_TM(byte tr_pin, int buf_size)
   TX_PIN = tr_pin;
   pinMode(TX_PIN, OUTPUT);
   digitalWrite(TX_PIN, LOW);
-
+}
+Oregon_TM::~Oregon_TM()
+{
+  delete SendBuffer;
 }
 
 Oregon_TM::Oregon_TM(byte tr_pin)
@@ -704,37 +707,53 @@ void Oregon_TM::setStartCount(byte startcount)
   if (startcount == 1) SendBuffer[3] |= 0x01;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Oregon_TM::setPressure(float mm_hg_pressure)
 {
+  byte pressure;
+  
   //Ограничения датчика по даташиту
-  word pressure =  (word)(mm_hg_pressure / 0.75);
-  if (mm_hg_pressure < 450) pressure = 600;
-  if (mm_hg_pressure > 790) pressure = 1054;
+  // if (mm_hg_pressure < 450) pressure = 600;
+  // if (mm_hg_pressure > 790) pressure = 1054;
 
   if (sens_type == BTHR968)
   {
-    pressure -=  600;
+    pressure = (byte)(mm_hg_pressure-856);
     SendBuffer[7] &= 0xF0;
     SendBuffer[7] += pressure & 0x0F;
     SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
-    //прогноз - переменно
-    SendBuffer[9] &= 0x0F;
-    SendBuffer[9] += 0x60;
   }
 
   if (sens_type == BTHGN129)
   {
-    pressure -=  545;
+    pressure = (byte)(mm_hg_pressure-795);
     SendBuffer[7] &= 0xF0;
     SendBuffer[7] += pressure & 0x0F;
     SendBuffer[8] = (pressure & 0x0F0) + ((pressure & 0xF00) >> 8);
-    SendBuffer[9] &= 0x0F;
-    SendBuffer[9] += 0x60;
   }
 
+  // prediction on nibble 18
+  if (mm_hg_pressure < 1000)
+  {
+    // rainy
+    SendBuffer[9] = 0x30;
+  }
+  else if (mm_hg_pressure < 1010)
+  {
+    // cloudy
+    SendBuffer[9] = 0x20;
+  }
+  else if (mm_hg_pressure < 1025)
+  {
+    // partly cloudy
+    SendBuffer[9] = 0x60;
+  }
+  else
+  {
+    // Sunny
+    SendBuffer[9] = 0xC0;
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void Oregon_TM::setTemperature(float temp)
